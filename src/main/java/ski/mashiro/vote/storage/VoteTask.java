@@ -1,8 +1,8 @@
 package ski.mashiro.vote.storage;
 
 import org.bukkit.entity.Player;
-import ski.mashiro.vote.timer.Timer;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -16,12 +16,19 @@ public class VoteTask {
     private String command;
     private String releaseTime;
     private String effectTime;
+    private boolean flag;
 
     public HashMap<Integer, Player> votes = new HashMap<>();
 
-    Timer timer = new Timer(this);
-
     public VoteTask() {
+    }
+
+    public boolean isFlag() {
+        return flag;
+    }
+
+    public void setFlag() {
+        flag = true;
     }
 
     public String getEffectTime() {
@@ -38,6 +45,16 @@ public class VoteTask {
 
     public void setReleaseTime(String releaseTime) {
         this.releaseTime = releaseTime;
+    }
+
+    public boolean verifyTimePatternCorrect(String stringDate){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+        try {
+            sdf.parse(stringDate);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String getCommand() {

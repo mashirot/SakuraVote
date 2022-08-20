@@ -18,8 +18,12 @@ public class Data {
         if (task.setTaskIdOut(id)) {
             task.setTaskName(name);
             task.setCommand(command);
-            task.setReleaseTime(releaseTime);
-            task.setEffectTime(effectTime);
+            if (task.verifyTimePatternCorrect(releaseTime) && task.verifyTimePatternCorrect(effectTime)) {
+                task.setReleaseTime(releaseTime);
+                task.setEffectTime(effectTime);
+            }else {
+                return false;
+            }
             voteTasks.add(task);
             return true;
         }
@@ -47,7 +51,7 @@ public class Data {
             int id = Integer.parseInt(taskId);
             for (VoteTask task : voteTasks) {
                 if (id == task.getTaskId()) {
-                    if (!task.votes.containsValue(player)) {
+                    if (task.isFlag() && !task.votes.containsValue(player)) {
                         task.votes.put(1, player);
                         return true;
                     }
@@ -59,14 +63,15 @@ public class Data {
         }
     }
     public static boolean disApproveVote(Player player, String taskId){
-
         try {
             int id = Integer.parseInt(taskId);
             for (VoteTask task : voteTasks) {
                 if (id == task.getTaskId()) {
-                    if (!task.votes.containsValue(player)) {
-                        task.votes.put(0, player);
-                        return true;
+                    if (task.isFlag()) {
+                        if (task.isFlag() && !task.votes.containsValue(player)) {
+                            task.votes.put(0, player);
+                            return true;
+                        }
                     }
                 }
             }
