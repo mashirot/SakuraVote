@@ -1,0 +1,10 @@
+name: Vote
+main: ski.mashiro.vote.Vote
+version: 1.0
+author: MashiroT
+commands:
+  vote:
+    description: "main"
+    usage: /<command> for
+    permission: "vote.use"
+    permission-message: "no permission"
