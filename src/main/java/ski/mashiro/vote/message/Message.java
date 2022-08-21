@@ -18,7 +18,8 @@ public class Message {
         commandSender.sendMessage(GREEN + "3. /vote approve [投票id]");
         commandSender.sendMessage(GREEN + "4. /vote disapprove [投票id]");
         commandSender.sendMessage(GREEN + "5. /vote list || 展示所有投票");
-        commandSender.sendMessage(GREEN + "6. /vote set [投票id] [投票名] [通过后执行的指令] [定时时间]");
+        commandSender.sendMessage(GREEN + "6. /vote set [投票id] [类型] [内容]");
+        commandSender.sendMessage(GREEN + "类型：投票名[name], 执行指令[command], 发布时间[releasetime], 有效时间[effecttime]");
         commandSender.sendMessage(DARK_GREEN + "========================");
     }
 

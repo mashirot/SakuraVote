@@ -18,17 +18,19 @@ public class Timer {
     private Timer() {
     }
 
-    private static long transformTime(String stringDate){
+    public static long transformTime(String stringDate){
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
         try {
             Date date = sdf.parse(stringDate);
             time = date.getTime();
-        } catch (Exception ignored) { }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return time;
     }
 
-    private static long verifyReleaseTime(VoteTask voteTask){
+    public static long verifyReleaseTime(VoteTask voteTask){
         long releaseTime = transformTime(voteTask.getReleaseTime()) - System.currentTimeMillis();
         return releaseTime > 0 ? releaseTime : -1;
     }
@@ -49,7 +51,7 @@ public class Timer {
                         public void run() {
                             cancel();
                         }
-                    }.runTaskLaterAsynchronously(plugin, transformTime(voteTask.getEffectTime()) / 1000 * 20);
+                    }.runTaskLaterAsynchronously(plugin, transformTime(voteTask.getEffectTime()) * 20);
                 }
             }.runTaskLaterAsynchronously(plugin, verifyReleaseTime(voteTask) / 1000 * 20);
         }

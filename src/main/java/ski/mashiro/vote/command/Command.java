@@ -28,6 +28,10 @@ public class Command implements CommandExecutor {
     private static final int TASK_DELETE_CORRECT_LENGTH = 2;
     private static final int TASK_APPROVE_CORRECT_LENGTH = 2;
     private static final int TASK_DISAPPROVE_CORRECT_LENGTH = 2;
+    private static final int TASK_MODIFY_ID = 1;
+    private static final int TASK_MODIFY_TYPE = 2;
+    private static final int TASK_MODIFY_VALUE = 3;
+    private static final int TASK_MODIFY_CORRECT_LENGTH = 4;
 
     @Override
     public boolean onCommand(CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
@@ -45,7 +49,7 @@ public class Command implements CommandExecutor {
                         if (Data.addVote(strings[TASK_NAME], strings[TASK_ID], strings[TASK_COMMAND], strings[TASK_RELEASE_TIME], strings[TASK_EFFECT_TIME])) {
                             commandSender.sendMessage("投票创建成功，id：" + strings[TASK_ID]);
                         }else {
-                            commandSender.sendMessage("投票创建失败，[投票id]应为数字");
+                            commandSender.sendMessage("投票创建失败，可能原因：[投票id]应为数字、VoteList文件夹下有相同[投票名]文件");
                         }
                     }
                 }catch (Exception e){
@@ -106,6 +110,15 @@ public class Command implements CommandExecutor {
                 break;
 
             case SET:
+                if (strings[TASK_MODIFY_ID] != null && strings[TASK_MODIFY_TYPE] != null &&
+                        strings[TASK_MODIFY_VALUE] != null && strings.length == TASK_MODIFY_CORRECT_LENGTH) {
+                    if (Data.modifyVote(strings[TASK_MODIFY_ID], strings[TASK_MODIFY_TYPE], strings[TASK_MODIFY_VALUE])) {
+                        commandSender.sendMessage("修改成功");
+                    }
+                    commandSender.sendMessage("修改失败");
+                }else {
+                    commandSender.sendMessage("修改有误，请输入/vote 查看使用说明");
+                }
                 break;
 
             default:

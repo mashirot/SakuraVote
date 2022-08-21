@@ -1,6 +1,7 @@
 package ski.mashiro.vote.storage;
 
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 public class Data {
 
     public static List<VoteTask> voteTasks = new ArrayList<>();
+    public static Plugin plugin;
 
     public static boolean addVote(String name, String id, String command, String releaseTime, String effectTime){
         VoteTask task = new VoteTask();
@@ -18,16 +20,21 @@ public class Data {
         if (task.setTaskIdOut(id)) {
             task.setTaskName(name);
             task.setCommand(command);
-            if (task.verifyTimePatternCorrect(releaseTime) && task.verifyTimePatternCorrect(effectTime)) {
+            if (task.verifyTimePatternCorrect(releaseTime)) {
                 task.setReleaseTime(releaseTime);
-                task.setEffectTime(effectTime);
-            }else {
-                return false;
+                if (task.setEffectTimeOut(effectTime)) {
+                    if (storeVoteTasks(plugin, task)) {
+                        voteTasks.add(task);
+                        return true;
+                    }
+                }
             }
-            voteTasks.add(task);
-            return true;
         }
         return false;
+    }
+
+    public static boolean storeVoteTasks(Plugin plugin, VoteTask voteTask){
+        return StoreVoteInFile.createVoteFile(plugin, voteTask);
     }
 
     public static boolean delVote(String id){
@@ -79,5 +86,9 @@ public class Data {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public static boolean modifyVote(String id, String type, String newValue){
+        return StoreVoteInFile.modifyVoteFile(id ,type, newValue);
     }
 }

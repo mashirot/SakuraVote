@@ -15,7 +15,7 @@ public class VoteTask {
     private int taskId;
     private String command;
     private String releaseTime;
-    private String effectTime;
+    private int effectTime;
     private boolean flag;
 
     public HashMap<Integer, Player> votes = new HashMap<>();
@@ -31,11 +31,20 @@ public class VoteTask {
         flag = true;
     }
 
-    public String getEffectTime() {
-        return effectTime;
+    public boolean setEffectTimeOut(String time){
+        try {
+            setEffectTime(Integer.parseInt(time));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    public void setEffectTime(String effectTime) {
+    public String getEffectTime() {
+        return effectTime + "";
+    }
+
+    private void setEffectTime(int effectTime) {
         this.effectTime = effectTime;
     }
 
