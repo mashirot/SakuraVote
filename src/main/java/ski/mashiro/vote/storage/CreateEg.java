@@ -1,6 +1,9 @@
 package ski.mashiro.vote.storage;
 
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+
+import java.io.File;
 
 /**
  * @author FeczIne
@@ -8,10 +11,12 @@ import org.bukkit.plugin.Plugin;
 public class CreateEg {
 
     public static void isFolderExist(Plugin plugin){
-        String[] fileNameList = plugin.getDataFolder().list();
-        if (fileNameList != null) {
-            for (String filename : fileNameList) {
-                if (!"VoteList".equals(filename)) {
+        File[] fileList = new File(plugin.getDataFolder() + "").listFiles();
+        if (fileList != null) {
+            for (File file : fileList) {
+                if (file.isDirectory() && "VoteList".equals(file.getName())) {
+
+                }else {
                     createFolder(plugin);
                 }
             }
@@ -19,6 +24,20 @@ public class CreateEg {
     }
 
     public static void createFolder(Plugin plugin){
-        plugin.saveResource("VoteList/VoteEg1", false);
+        File folder = new File(plugin.getDataFolder() + "/VoteList");
+        File eg = new File(folder, "VoteEg.yml");
+        try {
+            if (folder.mkdir() && eg.createNewFile()) {
+                YamlConfiguration yamlEg = YamlConfiguration.loadConfiguration(eg);
+                yamlEg.set("TaskID", 6657);
+                yamlEg.set("Name", "投票示例");
+                yamlEg.set("Command", "stop");
+                yamlEg.set("releaseTime", "2042/01/01 00:00:00");
+                yamlEg.set("effectTime", 600);
+                yamlEg.save(eg);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

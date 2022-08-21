@@ -1,8 +1,11 @@
 package ski.mashiro.vote.storage;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import ski.mashiro.vote.arithmetic.Arithmetic;
+import ski.mashiro.vote.timer.Timer;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,7 +64,7 @@ public class Data {
             for (VoteTask task : voteTasks) {
                 if (id == task.getTaskId()) {
                     if (task.isFlag() && !task.votes.containsValue(player)) {
-                        task.votes.put(1, player);
+                        task.votes.put(0, player);
                         return true;
                     }
                 }
@@ -79,7 +82,7 @@ public class Data {
                 if (id == task.getTaskId()) {
                     if (task.isFlag()) {
                         if (task.isFlag() && !task.votes.containsValue(player)) {
-                            task.votes.put(0, player);
+                            task.votes.put(1, player);
                             return true;
                         }
                     }
@@ -107,11 +110,42 @@ public class Data {
                     }
                 }
                 if (!flag) {
-                    voteTasks.add(new VoteTask(yamlVoteFile.getString("Name"), yamlVoteFile.getInt("TaskID"), yamlVoteFile.getString("Command"),
-                            yamlVoteFile.getString("releaseTime"), yamlVoteFile.getInt("effectTime")));
+                    VoteTask task = new VoteTask(yamlVoteFile.getString("Name"), yamlVoteFile.getInt("TaskID"), yamlVoteFile.getString("Command"),
+                            yamlVoteFile.getString("releaseTime"), yamlVoteFile.getInt("effectTime"));
+                    voteTasks.add(task);
+                    Timer.checkTimeToRun(plugin, task);
                 }
             }
         }
     }
 
+    public static void showResult(List<Player> approvePlayers, List<Player> disApprovePlayers){
+
+        StringBuilder yesPlayer = new StringBuilder();
+        StringBuilder disPlayer = new StringBuilder();
+        for (int i = 0; i < approvePlayers.size(); i++) {
+            yesPlayer.append(approvePlayers.get(i).getName()).append(approvePlayers.size() - 1 == i ? "，" : "");
+        }
+        for (int i = 0; i < disApprovePlayers.size(); i++) {
+            disPlayer.append(disApprovePlayers.get(i).getName()).append(disApprovePlayers.size() - 1 == i ? "，" : "");
+        }
+
+        Bukkit.broadcastMessage("赞成玩家：" + yesPlayer);
+        Bukkit.broadcastMessage("反对玩家：" + disPlayer);
+    }
+
+    public static void calcResult(VoteTask voteTask){
+        switch (Arithmetic.result(voteTask.votes)) {
+            case 1:
+                Bukkit.broadcastMessage("投票通过");
+                break;
+            case 0:
+                Bukkit.broadcastMessage("投票不通过");
+                break;
+            case -1:
+            default:
+                Bukkit.broadcastMessage("投票人数小于在线人数的一半，本次结果无效");
+                break;
+        }
+    }
 }

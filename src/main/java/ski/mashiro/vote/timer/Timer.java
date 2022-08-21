@@ -3,6 +3,7 @@ package ski.mashiro.vote.timer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import ski.mashiro.vote.storage.Data;
 import ski.mashiro.vote.storage.VoteTask;
 
 import java.text.SimpleDateFormat;
@@ -32,14 +33,13 @@ public class Timer {
 
     public static long verifyReleaseTime(VoteTask voteTask){
         long releaseTime = transformTime(voteTask.getReleaseTime()) - System.currentTimeMillis();
-        return releaseTime > 0 ? releaseTime : -1;
+        return releaseTime > 0 ? -1 : releaseTime;
     }
     public static void checkTimeToRun(Plugin plugin, VoteTask voteTask){
         if (verifyReleaseTime(voteTask) != -1) {
             new BukkitRunnable(){
                 @Override
                 public void run() {
-
                     Bukkit.broadcastMessage("即将开始投票");
                     Bukkit.broadcastMessage("投票名：" + voteTask.getTaskName());
                     Bukkit.broadcastMessage("投票ID：" + voteTask.getTaskId());
@@ -49,6 +49,7 @@ public class Timer {
                     new BukkitRunnable(){
                         @Override
                         public void run() {
+                            Data.calcResult(voteTask);
                             cancel();
                         }
                     }.runTaskLaterAsynchronously(plugin, transformTime(voteTask.getEffectTime()) * 20);

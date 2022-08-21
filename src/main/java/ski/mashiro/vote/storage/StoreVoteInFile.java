@@ -55,16 +55,16 @@ public class StoreVoteInFile {
 
     public static boolean modifyVoteFile(String id, String operate, String newValue){
 
-        File[] voteFileNames = new File(Data.plugin.getDataFolder() + "/VoteList").listFiles();
-        if (voteFileNames != null) {
-            for (File voteFileName : voteFileNames) {
-                if (id.equals(voteFileName.getName())) {
-                    YamlConfiguration yamlVoteFile = YamlConfiguration.loadConfiguration(voteFileName);
+        File[] voteFiles = new File(Data.plugin.getDataFolder() + "/VoteList").listFiles();
+        if (voteFiles != null) {
+            for (File voteFile : voteFiles) {
+                if (id.equals(voteFile.getName())) {
+                    YamlConfiguration yamlVoteFile = YamlConfiguration.loadConfiguration(voteFile);
                     try {
                         switch (operate.toLowerCase()){
                             case NAME:
                                 yamlVoteFile.set("Name", newValue);
-                                yamlVoteFile.save(voteFileName);
+                                yamlVoteFile.save(voteFile);
                                 return true;
                             case COMMAND:
                                 yamlVoteFile.set("Command", newValue);
