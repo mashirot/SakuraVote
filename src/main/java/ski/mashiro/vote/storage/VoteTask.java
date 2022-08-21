@@ -48,8 +48,8 @@ public class VoteTask {
         }
     }
 
-    public String getEffectTime() {
-        return effectTime + "";
+    public int getEffectTime() {
+        return effectTime;
     }
 
     private void setEffectTime(int effectTime) {
