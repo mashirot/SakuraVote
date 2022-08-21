@@ -28,6 +28,7 @@ public class Vote extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        Bukkit.getScheduler().cancelTasks(this);
         getLogger().info("Vote投票插件已卸载");
     }
 }

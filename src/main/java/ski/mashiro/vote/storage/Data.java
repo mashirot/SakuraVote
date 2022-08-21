@@ -137,6 +137,7 @@ public class Data {
     public static void calcResult(VoteTask voteTask){
         switch (Arithmetic.result(voteTask.votes)) {
             case 1:
+                Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), voteTask.getCommand());
                 Bukkit.broadcastMessage("投票通过");
                 break;
             case 0:

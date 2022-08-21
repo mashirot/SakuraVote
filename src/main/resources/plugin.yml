@@ -5,6 +5,4 @@ author: MashiroT
 commands:
   vote:
     description: "main"
-    usage: /<command> for
-    permission: "vote.use"
-    permission-message: "no permission"
+    usage: /<command>
