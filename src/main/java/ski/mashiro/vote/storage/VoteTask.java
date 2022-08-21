@@ -23,6 +23,14 @@ public class VoteTask {
     public VoteTask() {
     }
 
+    public VoteTask(String taskName, int taskId, String command, String releaseTime, int effectTime) {
+        this.taskName = taskName;
+        this.taskId = taskId;
+        this.command = command;
+        this.releaseTime = releaseTime;
+        this.effectTime = effectTime;
+    }
+
     public boolean isFlag() {
         return flag;
     }

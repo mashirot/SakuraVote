@@ -18,7 +18,7 @@ public class StoreVoteInFile {
 
     public static boolean createVoteFile(Plugin plugin, VoteTask voteTask) {
 
-        File voteTaskFile = new File(plugin.getDataFolder() + "/VoteList/" + voteTask.getTaskName() + ".yml");
+        File voteTaskFile = new File(plugin.getDataFolder().getAbsolutePath() + "/VoteList/" + voteTask.getTaskName() + ".yml");
 
         YamlConfiguration yamlTaskFile = YamlConfiguration.loadConfiguration(voteTaskFile);
 

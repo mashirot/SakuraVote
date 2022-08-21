@@ -49,7 +49,7 @@ public class Command implements CommandExecutor {
                         if (Data.addVote(strings[TASK_NAME], strings[TASK_ID], strings[TASK_COMMAND], strings[TASK_RELEASE_TIME], strings[TASK_EFFECT_TIME])) {
                             commandSender.sendMessage("投票创建成功，id：" + strings[TASK_ID]);
                         }else {
-                            commandSender.sendMessage("投票创建失败，可能原因：[投票id]应为数字、VoteList文件夹下有相同[投票名]文件");
+                            commandSender.sendMessage("投票创建失败，可能原因：[投票id]应为数字，VoteList文件夹下有相同[投票名]文件");
                         }
                     }
                 }catch (Exception e){

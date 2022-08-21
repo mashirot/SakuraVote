@@ -3,6 +3,7 @@ package ski.mashiro.vote;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import ski.mashiro.vote.command.Command;
+import ski.mashiro.vote.storage.CreateEg;
 import ski.mashiro.vote.storage.Data;
 
 /**
@@ -19,7 +20,8 @@ public class Vote extends JavaPlugin {
     public void onEnable() {
         Bukkit.getPluginCommand("vote").setExecutor(new Command());
         this.saveDefaultConfig();
-        this.saveResource("/VoteList/VoteEg1.yml", false);
+        CreateEg.isFolderExist(this);
+        Data.loadVoteTaskFromFile(this);
         Data.plugin = this;
         getLogger().info("Vote投票插件启动成功");
     }
