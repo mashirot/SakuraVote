@@ -1,62 +1,63 @@
 package ski.mashiro.vote.timer;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import ski.mashiro.vote.storage.Data;
 import ski.mashiro.vote.storage.VoteTask;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import static ski.mashiro.vote.storage.Data.verifyReleaseTime;
 
 /**
  * @author MashiroT
  */
 public class Timer {
 
-    private Timer() {
-    }
+    private Timer() {}
 
-    public static long transformTime(String stringDate){
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        long time;
-        try {
-            Date date = sdf.parse(stringDate);
-            time = date.getTime();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-        return time;
-    }
-
-    public static long verifyReleaseTime(VoteTask voteTask){
-        long releaseTime = transformTime(voteTask.getReleaseTime()) - System.currentTimeMillis();
-        return releaseTime > 0 ? -1 : releaseTime;
-    }
-    public static void checkTimeToRun(Plugin plugin, VoteTask voteTask){
+    public static void checkTimeToRun(VoteTask voteTask) {
         if (verifyReleaseTime(voteTask) != -1) {
-            new BukkitRunnable(){
+            new BukkitRunnable() {
                 @Override
                 public void run() {
+                    int taskId = getTaskId();
                     Bukkit.broadcastMessage("即将开始投票");
                     Bukkit.broadcastMessage("投票名：" + voteTask.getTaskName());
                     Bukkit.broadcastMessage("投票ID：" + voteTask.getTaskId());
                     Bukkit.broadcastMessage("投票时间：" + voteTask.getEffectTime() + "秒");
                     Bukkit.broadcastMessage("输入/vote [approve/disapprove]" + voteTask.getTaskId() + "进行支持或反对");
-                    voteTask.setFlag();
-                    new BukkitRunnable(){
+                    voteTask.changeVoteState();
+                    new BukkitRunnable() {
                         @Override
                         public void run() {
+                            voteTask.changeVoteState();
                             Data.calcResult(voteTask);
+                            Bukkit.getScheduler().cancelTask(taskId);
                             cancel();
                         }
-                    }.runTaskLaterAsynchronously(plugin, voteTask.getEffectTime() * 20L);
+                    }.runTaskLaterAsynchronously(Data.plugin, voteTask.getEffectTime() * 20L);
+                    while (voteTask.isCancel()) {
+                        voteTask.setCancel(false);
+                        Bukkit.getScheduler().cancelTask(taskId);
+                    }
                 }
-            }.runTaskLaterAsynchronously(plugin, verifyReleaseTime(voteTask) / 1000 * 20);
+            }.runTaskLaterAsynchronously(Data.plugin, verifyReleaseTime(voteTask) / 1000 * 20);
         }
-
     }
 
+    public static boolean cancelTask(String cancelId) {
+        try {
+            int id = Integer.parseInt(cancelId);
+            for (VoteTask voteTask : Data.voteTasks) {
+                if (voteTask.isStart()) {
+                    if (voteTask.getTaskId() == id) {
+                        voteTask.setCancel(true);
+                        return true;
+                    }
+                }
+            }
+        }catch (Exception e) {
+            return false;
+        }
+        return false;
+    }
 }

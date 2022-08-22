@@ -2,7 +2,6 @@ package ski.mashiro.vote.storage;
 
 import org.bukkit.entity.Player;
 
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -16,30 +15,49 @@ public class VoteTask {
     private String command;
     private String releaseTime;
     private int effectTime;
-    private boolean flag;
+    private boolean isStart;
+    private boolean isReuse;
+    private boolean isCancel;
 
     public HashMap<Integer, Player> votes = new HashMap<>();
 
     public VoteTask() {
     }
 
-    public VoteTask(String taskName, int taskId, String command, String releaseTime, int effectTime) {
+    public VoteTask(String taskName, int taskId, String command, String releaseTime, int effectTime, boolean isReuse) {
         this.taskName = taskName;
         this.taskId = taskId;
         this.command = command;
         this.releaseTime = releaseTime;
         this.effectTime = effectTime;
+        this.isReuse = isReuse;
     }
 
-    public boolean isFlag() {
-        return flag;
+    public boolean isCancel() {
+        return isCancel;
     }
 
-    public void setFlag() {
-        flag = true;
+    public void setCancel(boolean cancel) {
+        isCancel = cancel;
     }
 
-    public boolean setEffectTimeOut(String time){
+    public boolean isReuse() {
+        return isReuse;
+    }
+
+    public void reuse() {
+        isReuse = !isReuse;
+    }
+
+    public boolean isStart() {
+        return isStart;
+    }
+
+    public void changeVoteState() {
+        isStart = !isStart;
+    }
+
+    public boolean setEffectTimeOut(String time) {
         try {
             setEffectTime(Integer.parseInt(time));
             return true;
@@ -62,16 +80,6 @@ public class VoteTask {
 
     public void setReleaseTime(String releaseTime) {
         this.releaseTime = releaseTime;
-    }
-
-    public boolean verifyTimePatternCorrect(String stringDate){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
-        try {
-            sdf.parse(stringDate);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     public String getCommand() {

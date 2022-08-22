@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import ski.mashiro.vote.message.Message;
 import ski.mashiro.vote.storage.Data;
 import ski.mashiro.vote.storage.VoteTask;
+import ski.mashiro.vote.timer.Timer;
 
 /**
  * @author MashiroT
@@ -19,6 +20,8 @@ public class Command implements CommandExecutor {
     private static final String DISAPPROVE = "disapprove";
     private static final String LIST = "list";
     private static final String SET = "set";
+    private static final String REUSE = "reuse";
+    private static final String CANCEL = "cancel";
     private static final int TASK_NAME = 1;
     private static final int TASK_ID = 2;
     private static final int TASK_COMMAND = 3;
@@ -32,6 +35,10 @@ public class Command implements CommandExecutor {
     private static final int TASK_MODIFY_TYPE = 2;
     private static final int TASK_MODIFY_VALUE = 3;
     private static final int TASK_MODIFY_CORRECT_LENGTH = 4;
+    private static final int TASK_REUSE_ID = 1;
+    private static final int TASK_REUSE_CORRECT_LENGTH = 2;
+    private static final int TASK_CANCEL_ID = 1;
+    private static final int TASK_CANCEL_CORRECT_LENGTH = 2;
 
     @Override
     public boolean onCommand(CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
@@ -49,7 +56,7 @@ public class Command implements CommandExecutor {
                         if (Data.addVote(strings[TASK_NAME], strings[TASK_ID], strings[TASK_COMMAND], strings[TASK_RELEASE_TIME], strings[TASK_EFFECT_TIME])) {
                             commandSender.sendMessage("投票创建成功，id：" + strings[TASK_ID]);
                         }else {
-                            commandSender.sendMessage("投票创建失败，可能原因：[投票id]应为数字，VoteList文件夹下有相同[投票名]文件");
+                            commandSender.sendMessage("投票创建失败，可能原因：[投票id]为数字，VoteList文件夹下有相同[投票名]文件");
                         }
                     }
                 }catch (Exception e){
@@ -105,7 +112,6 @@ public class Command implements CommandExecutor {
                     }else {
                         commandSender.sendMessage("暂无投票");
                     }
-
                 }
                 break;
 
@@ -115,14 +121,37 @@ public class Command implements CommandExecutor {
                     if (Data.modifyVote(strings[TASK_MODIFY_ID], strings[TASK_MODIFY_TYPE], strings[TASK_MODIFY_VALUE])) {
                         commandSender.sendMessage("修改成功");
                     }
-                    commandSender.sendMessage("修改失败");
+                    commandSender.sendMessage("修改失败，请重试");
                 }else {
-                    commandSender.sendMessage("修改有误，请输入/vote 查看使用说明");
+                    commandSender.sendMessage("输入有误，请输入/vote 查看使用说明");
+                }
+                break;
+
+            case REUSE:
+                if (strings[TASK_REUSE_ID] != null && strings.length == TASK_REUSE_CORRECT_LENGTH) {
+                    if (Data.modifyTaskReuse(strings[TASK_REUSE_ID])) {
+                        commandSender.sendMessage("修改成功，投票id：" + strings[TASK_REUSE_ID]);
+                    }else {
+                        commandSender.sendMessage("修改失败，投票id输入有误");
+                    }
+                }
+                break;
+
+            case CANCEL:
+                if (strings[TASK_CANCEL_ID] != null && strings.length == TASK_CANCEL_CORRECT_LENGTH) {
+                    if (Timer.cancelTask(strings[TASK_CANCEL_ID])) {
+                        commandSender.sendMessage("取消投票成功");
+                    }else {
+                        commandSender.sendMessage("取消失败，不存在该投票或投票未开始");
+                    }
+                }else {
+                    commandSender.sendMessage("输入有误，请输入/vote 查看使用说明");
                 }
                 break;
 
             default:
                 commandSender.sendMessage("输入有误，请输入/vote 查看使用说明");
+                break;
         }
         return true;
     }

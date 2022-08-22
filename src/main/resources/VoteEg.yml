@@ -12,5 +12,6 @@ Command: stop
 releaseTime: 2042/01/01 00:00:00
 # 10min = 10*60s = 600s
 effectTime: 600
+reuse: false
 
 

@@ -9,21 +9,20 @@ import java.io.File;
  * @author FeczIne
  */
 public class CreateEg {
+    private CreateEg() {}
 
-    public static void isFolderExist(Plugin plugin){
+    public static void isFolderExist(Plugin plugin) {
         File[] fileList = new File(plugin.getDataFolder() + "").listFiles();
         if (fileList != null) {
             for (File file : fileList) {
-                if (file.isDirectory() && "VoteList".equals(file.getName())) {
-
-                }else {
+                if (!file.isDirectory() || !"VoteList".equals(file.getName())) {
                     createFolder(plugin);
                 }
             }
         }
     }
 
-    public static void createFolder(Plugin plugin){
+    public static void createFolder(Plugin plugin) {
         File folder = new File(plugin.getDataFolder() + "/VoteList");
         File eg = new File(folder, "VoteEg.yml");
         try {
@@ -32,8 +31,9 @@ public class CreateEg {
                 yamlEg.set("TaskID", 6657);
                 yamlEg.set("Name", "投票示例");
                 yamlEg.set("Command", "stop");
-                yamlEg.set("releaseTime", "2042/01/01 00:00:00");
+                yamlEg.set("releaseTime", "2042-01-01 00:00:00");
                 yamlEg.set("effectTime", 600);
+                yamlEg.set("reuse", false);
                 yamlEg.save(eg);
             }
         } catch (Exception e) {

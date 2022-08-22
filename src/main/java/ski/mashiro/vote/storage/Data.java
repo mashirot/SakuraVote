@@ -8,7 +8,9 @@ import ski.mashiro.vote.arithmetic.Arithmetic;
 import ski.mashiro.vote.timer.Timer;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,18 +21,21 @@ public class Data {
     public static List<VoteTask> voteTasks = new ArrayList<>();
     public static Plugin plugin;
 
-    public static boolean addVote(String name, String id, String command, String releaseTime, String effectTime){
-        VoteTask task = new VoteTask();
+    private Data() {}
 
+    public static boolean addVote(String name, String id, String command, String releaseTime, String effectTime) {
+        VoteTask task = new VoteTask();
         if (task.setTaskIdOut(id)) {
-            task.setTaskName(name);
-            task.setCommand(command);
-            if (task.verifyTimePatternCorrect(releaseTime)) {
-                task.setReleaseTime(releaseTime);
-                if (task.setEffectTimeOut(effectTime)) {
-                    if (storeVoteTasks(plugin, task)) {
-                        voteTasks.add(task);
-                        return true;
+            if (!VoteWithFile.isFileExist(Integer.parseInt(id))) {
+                task.setTaskName(name);
+                task.setCommand(command);
+                if (verifyTimePatternCorrect(releaseTime)) {
+                    task.setReleaseTime(releaseTime);
+                    if (task.setEffectTimeOut(effectTime)) {
+                        if (storeVoteTasks(task)) {
+                            voteTasks.add(task);
+                            return true;
+                        }
                     }
                 }
             }
@@ -38,17 +43,22 @@ public class Data {
         return false;
     }
 
-    public static boolean storeVoteTasks(Plugin plugin, VoteTask voteTask){
-        return StoreVoteInFile.createVoteFile(plugin, voteTask);
+    public static boolean storeVoteTasks(VoteTask voteTask) {
+        return VoteWithFile.createVoteFile(voteTask);
     }
 
     public static boolean delVote(String id){
         try {
             int delId = Integer.parseInt(id);
             for (VoteTask task : voteTasks) {
-                if (delId == task.getTaskId()) {
-                    voteTasks.remove(task);
-                    return true;
+                if (VoteWithFile.isFileExist(delId)) {
+                    if (delId == task.getTaskId() && !task.isStart()) {
+                        if (VoteWithFile.deleteVoteFile(delId)) {
+                            Timer.cancelTask(delId + "");
+                            voteTasks.remove(task);
+                            return true;
+                        }
+                    }
                 }
             }
             return false;
@@ -63,7 +73,7 @@ public class Data {
             int id = Integer.parseInt(taskId);
             for (VoteTask task : voteTasks) {
                 if (id == task.getTaskId()) {
-                    if (task.isFlag() && !task.votes.containsValue(player)) {
+                    if (task.isStart() && !task.votes.containsValue(player)) {
                         task.votes.put(0, player);
                         return true;
                     }
@@ -75,13 +85,13 @@ public class Data {
         }
     }
 
-    public static boolean disApproveVote(Player player, String taskId){
+    public static boolean disApproveVote(Player player, String taskId) {
         try {
             int id = Integer.parseInt(taskId);
             for (VoteTask task : voteTasks) {
                 if (id == task.getTaskId()) {
-                    if (task.isFlag()) {
-                        if (task.isFlag() && !task.votes.containsValue(player)) {
+                    if (task.isStart()) {
+                        if (task.isStart() && !task.votes.containsValue(player)) {
                             task.votes.put(1, player);
                             return true;
                         }
@@ -94,32 +104,31 @@ public class Data {
         }
     }
 
-    public static boolean modifyVote(String id, String type, String newValue){
-        return StoreVoteInFile.modifyVoteFile(id ,type, newValue);
+    public static boolean modifyVote(String id, String type, String newValue) {
+        return VoteWithFile.modifyVoteFile(id ,type, newValue);
     }
 
     public static void loadVoteTaskFromFile(Plugin plugin){
         File[] voteFiles = new File(plugin.getDataFolder() + "/VoteList").listFiles();
-        boolean flag = false;
         if (voteFiles != null) {
             for (File voteFile : voteFiles) {
                 YamlConfiguration yamlVoteFile = YamlConfiguration.loadConfiguration(voteFile);
-                for (VoteTask task : voteTasks) {
-                    if (task.getTaskId() == yamlVoteFile.getInt("TaskID")) {
-                        flag = true;
+                for (VoteTask inListTask : voteTasks) {
+                    boolean isLoad = inListTask.getTaskId() == yamlVoteFile.getInt("TaskID");
+                    if (!isLoad) {
+                        VoteTask newTask = new VoteTask(yamlVoteFile.getString("Name"), yamlVoteFile.getInt("TaskID"), yamlVoteFile.getString("Command"),
+                                yamlVoteFile.getString("releaseTime"), yamlVoteFile.getInt("effectTime"), yamlVoteFile.getBoolean("reuse"));
+                        if (verifyReleaseTime(newTask) != -1) {
+                            voteTasks.add(newTask);
+                            Timer.checkTimeToRun(newTask);
+                        }
                     }
-                }
-                if (!flag) {
-                    VoteTask task = new VoteTask(yamlVoteFile.getString("Name"), yamlVoteFile.getInt("TaskID"), yamlVoteFile.getString("Command"),
-                            yamlVoteFile.getString("releaseTime"), yamlVoteFile.getInt("effectTime"));
-                    voteTasks.add(task);
-                    Timer.checkTimeToRun(plugin, task);
                 }
             }
         }
     }
 
-    public static void showResult(List<Player> approvePlayers, List<Player> disApprovePlayers){
+    public static void showResult(List<Player> approvePlayers, List<Player> disApprovePlayers) {
 
         StringBuilder yesPlayer = new StringBuilder();
         StringBuilder disPlayer = new StringBuilder();
@@ -134,7 +143,7 @@ public class Data {
         Bukkit.broadcastMessage("反对玩家：" + disPlayer);
     }
 
-    public static void calcResult(VoteTask voteTask){
+    public static void calcResult(VoteTask voteTask) {
         switch (Arithmetic.result(voteTask.votes)) {
             case 1:
                 Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), voteTask.getCommand());
@@ -149,4 +158,49 @@ public class Data {
                 break;
         }
     }
+
+    public static boolean modifyTaskReuse(String modifyId) {
+        try {
+            int id = Integer.parseInt(modifyId);
+            for (VoteTask voteTask : voteTasks) {
+                if (id == voteTask.getTaskId()) {
+                    voteTask.reuse();
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static long transformTime(String stringDate) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long time;
+        try {
+            Date date = sdf.parse(stringDate);
+            time = date.getTime();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return time;
+    }
+
+    public static long verifyReleaseTime(VoteTask voteTask) {
+        long releaseTime = transformTime(voteTask.getReleaseTime()) - System.currentTimeMillis();
+        return releaseTime > 0 ? -1 : releaseTime;
+    }
+
+    public static boolean verifyTimePatternCorrect(String stringDate) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            sdf.parse(stringDate);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }
