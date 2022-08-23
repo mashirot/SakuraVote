@@ -21,6 +21,7 @@ public class Command implements CommandExecutor {
     private static final String LIST = "list";
     private static final String SET = "set";
     private static final String CANCEL = "cancel";
+    private static final String RELOAD = "reload";
     private static final int TASK_NAME = 1;
     private static final int TASK_ID = 2;
     private static final int TASK_COMMAND = 3;
@@ -36,6 +37,7 @@ public class Command implements CommandExecutor {
     private static final int TASK_MODIFY_CORRECT_LENGTH = 4;
     private static final int TASK_CANCEL_ID = 1;
     private static final int TASK_CANCEL_CORRECT_LENGTH = 2;
+    private static final int RELOAD_CORRECT_LENGTH = 1;
 
     @Override
     public boolean onCommand(CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
@@ -141,6 +143,12 @@ public class Command implements CommandExecutor {
                 }
                 break;
 
+            case RELOAD:
+                if (strings.length == RELOAD_CORRECT_LENGTH) {
+                    Data.reloadTaskAndConfig();
+                    commandSender.sendMessage("[SakuraVote]重载成功");
+                }
+                break;
             default:
                 commandSender.sendMessage("[SakuraVote]输入有误，请输入/vote 查看使用说明");
                 break;

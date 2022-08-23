@@ -33,6 +33,7 @@ public class SakuraVote extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        saveConfig();
         Bukkit.getScheduler().cancelTasks(this);
         getLogger().info("SakuraVote投票插件已卸载");
     }

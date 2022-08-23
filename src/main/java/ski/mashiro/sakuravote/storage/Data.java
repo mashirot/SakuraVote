@@ -49,7 +49,7 @@ public class Data {
         return VoteInFile.createVoteFile(voteTask);
     }
 
-    public static boolean delVote(String id){
+    public static boolean delVote(String id) {
         if (isInteger(id)) {
             int delId = Integer.parseInt(id);
             for (VoteTask task : VOTE_TASKS) {
@@ -128,24 +128,30 @@ public class Data {
                         for (int i = 0; i < VOTE_TASKS.size(); i++) {
                             boolean isLoad = VOTE_TASKS.get(i).getTaskId() == yamlVoteFile.getInt("TaskID");
                             if (!isLoad) {
-                                addVoteInListFromFile(yamlVoteFile);
+                                addVoteToListFromFile(yamlVoteFile);
                             }
                         }
                     }else {
-                        addVoteInListFromFile(yamlVoteFile);
+                        addVoteToListFromFile(yamlVoteFile);
                     }
                 }
             }
         }
     }
 
-    public static void addVoteInListFromFile(YamlConfiguration yamlVoteFile) {
+    public static void addVoteToListFromFile(YamlConfiguration yamlVoteFile) {
         VoteTask newTask = new VoteTask(yamlVoteFile.getString("Name"), yamlVoteFile.getInt("TaskID"), yamlVoteFile.getString("Command"),
                 yamlVoteFile.getString("releaseTime"), yamlVoteFile.getInt("effectTime"), yamlVoteFile.getBoolean("reuse"));
         VOTE_TASKS.add(newTask);
         if (verifyReleaseTime(newTask) != -1) {
             Timer.checkTimeToRun(newTask);
         }
+    }
+
+    public static void reloadTaskAndConfig() {
+        VOTE_TASKS.clear();
+        loadVoteTaskFromFile(plugin);
+        plugin.reloadConfig();
     }
 
     public static String replaceCommand(String inputCommand) {
