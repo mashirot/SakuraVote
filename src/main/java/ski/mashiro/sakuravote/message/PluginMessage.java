@@ -1,4 +1,4 @@
-package ski.mashiro.vote.message;
+package ski.mashiro.sakuravote.message;
 
 import org.bukkit.command.CommandSender;
 
@@ -13,9 +13,10 @@ public class PluginMessage {
     private PluginMessage() {}
 
     public static void showHelp(CommandSender commandSender) {
-        commandSender.sendMessage(DARK_GREEN + "==============Vote==============");
+        commandSender.sendMessage(DARK_GREEN + "==============SakuraVote==============");
         commandSender.sendMessage(GREEN + "1. /vote create [投票名] [投票id] [通过后执行的指令] [发布时间] [有效时间]");
-        commandSender.sendMessage(GREEN + "说明：指令不需要带 /，发布时间格式 [yyyy-MM-dd|hh:MM:ss]，有效时间以[秒]为单位，1分钟就填 60");
+        commandSender.sendMessage(GREEN + "说明：指令不需要带 /，中间空格使用_代替[time_set_0]，发布时间格式 [yyyy-MM-dd|hh:MM:ss]");
+        commandSender.sendMessage(GREEN + "说明：有效时间以[秒]为单位，1分钟就填 60");
         commandSender.sendMessage(GREEN + "2. /vote del [投票id]");
         commandSender.sendMessage(GREEN + "3. /vote approve [投票id]");
         commandSender.sendMessage(GREEN + "4. /vote disapprove [投票id]");
@@ -24,7 +25,7 @@ public class PluginMessage {
         commandSender.sendMessage(GREEN + "说明：类型：投票名[name], 执行指令[command], 发布时间[releasetime], 有效时间[effecttime]，循环[reuse](内容填写true/false)");
         commandSender.sendMessage(GREEN + "7. /vote cancel [投票id]");
         commandSender.sendMessage(GREEN + "说明：只能取消未过期的投票(不删除)，删除投票请使用[2.]");
-        commandSender.sendMessage(DARK_GREEN + "================================");
+        commandSender.sendMessage(DARK_GREEN + "======================================");
     }
 
     public static void showCreateErrMessage(CommandSender commandSender) {

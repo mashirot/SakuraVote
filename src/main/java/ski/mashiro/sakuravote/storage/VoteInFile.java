@@ -1,4 +1,4 @@
-package ski.mashiro.vote.storage;
+package ski.mashiro.sakuravote.storage;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -83,11 +83,13 @@ public class VoteInFile {
                                     yamlVoteFile.save(voteFile);
                                     return true;
                                 case RELEASE_TIME:
-                                    long time = Data.transformTime(newValue) - System.currentTimeMillis();
-                                    if (time > 0) {
-                                        yamlVoteFile.set("releaseTime", newValue);
-                                        yamlVoteFile.save(voteFile);
-                                        return true;
+                                    if (Data.transformTime(newValue) != -1) {
+                                        long time = Data.transformTime(newValue) - System.currentTimeMillis();
+                                        if (time > 0) {
+                                            yamlVoteFile.set("releaseTime", newValue);
+                                            yamlVoteFile.save(voteFile);
+                                            return true;
+                                        }
                                     }
                                     return false;
                                 case EFFECT_TIME:
@@ -111,7 +113,6 @@ public class VoteInFile {
                 }
             }
         }
-
         return false;
     }
 

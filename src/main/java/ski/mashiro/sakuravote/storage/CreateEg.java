@@ -1,4 +1,4 @@
-package ski.mashiro.vote.storage;
+package ski.mashiro.sakuravote.storage;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;

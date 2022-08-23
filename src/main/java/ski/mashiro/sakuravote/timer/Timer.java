@@ -1,14 +1,15 @@
-package ski.mashiro.vote.timer;
+package ski.mashiro.sakuravote.timer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
-import ski.mashiro.vote.storage.Data;
-import ski.mashiro.vote.storage.VoteInFile;
-import ski.mashiro.vote.storage.VoteTask;
+import ski.mashiro.sakuravote.storage.Data;
+import ski.mashiro.sakuravote.storage.VoteInFile;
+import ski.mashiro.sakuravote.storage.VoteTask;
 
 import java.text.SimpleDateFormat;
 
-import static ski.mashiro.vote.storage.Data.verifyReleaseTime;
+import static ski.mashiro.sakuravote.storage.Data.isInteger;
+import static ski.mashiro.sakuravote.storage.Data.verifyReleaseTime;
 
 /**
  * @author MashiroT
@@ -24,15 +25,16 @@ public class Timer {
                 @Override
                 public void run() {
                     int taskId = getTaskId();
-                    Bukkit.broadcastMessage("即将开始投票");
-                    Bukkit.broadcastMessage("投票名：" + voteTask.getTaskName());
-                    Bukkit.broadcastMessage("投票ID：" + voteTask.getTaskId());
-                    Bukkit.broadcastMessage("投票时间：" + voteTask.getEffectTime() + "秒");
-                    Bukkit.broadcastMessage("输入/vote [approve/disapprove]" + voteTask.getTaskId() + "进行支持或反对");
+                    Bukkit.broadcastMessage("[SakuraVote]即将开始投票");
+                    Bukkit.broadcastMessage("[SakuraVote]投票名：" + voteTask.getTaskName());
+                    Bukkit.broadcastMessage("[SakuraVote]投票ID：" + voteTask.getTaskId());
+                    Bukkit.broadcastMessage("[SakuraVote]投票时间：" + voteTask.getEffectTime() + "秒");
+                    Bukkit.broadcastMessage("[SakuraVote]输入/vote [approve/disapprove] " + voteTask.getTaskId() + " 进行支持或反对");
                     voteTask.changeVoteState();
                     new BukkitRunnable() {
                         @Override
                         public void run() {
+                            Bukkit.broadcastMessage("[SakuraVote]投票结束");
                             voteTask.changeVoteState();
                             Data.calcResult(voteTask);
                             Bukkit.getScheduler().cancelTask(taskId);
@@ -44,7 +46,7 @@ public class Timer {
                     }.runTaskLaterAsynchronously(Data.plugin, voteTask.getEffectTime() * 20L);
                     while (voteTask.isCancel()) {
                         voteTask.setCancel(false);
-                        Bukkit.getScheduler().cancelTask(taskId);
+                        cancel();
                     }
                 }
             }.runTaskLaterAsynchronously(Data.plugin, releaseTime / 1000 * 20);
@@ -52,7 +54,7 @@ public class Timer {
     }
 
     public static boolean cancelTask(String cancelId) {
-        try {
+        if (isInteger(cancelId)) {
             int id = Integer.parseInt(cancelId);
             for (VoteTask voteTask : Data.VOTE_TASKS) {
                 if (voteTask.isStart()) {
@@ -62,8 +64,6 @@ public class Timer {
                     }
                 }
             }
-        }catch (Exception e) {
-            return false;
         }
         return false;
     }

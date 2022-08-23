@@ -1,11 +1,12 @@
-package ski.mashiro.vote.storage;
+package ski.mashiro.sakuravote.storage;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import ski.mashiro.vote.arithmetic.Arithmetic;
-import ski.mashiro.vote.timer.Timer;
+import org.bukkit.scheduler.BukkitRunnable;
+import ski.mashiro.sakuravote.arithmetic.Arithmetic;
+import ski.mashiro.sakuravote.timer.Timer;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -29,7 +30,7 @@ public class Data {
                 VoteTask task = new VoteTask();
                 task.setTaskId(Integer.parseInt(id));
                 task.setTaskName(name);
-                task.setCommand(command);
+                task.setCommand(replaceCommand(command));
                 task.setReleaseTime(releaseTime);
                 task.setEffectTime(Integer.parseInt(effectTime));
                 if (storeVoteTasks(task)) {
@@ -56,14 +57,13 @@ public class Data {
                     if (delId == task.getTaskId() && !task.isStart()) {
                         if (VoteInFile.deleteVoteFile(delId)) {
                             Timer.cancelTask(delId + "");
-                            VOTE_TASKS.remove(task);
+                            VOTE_TASKS.iterator().remove();
                             return true;
                         }
                     }
                 }
             }
         }
-
         return false;
     }
 
@@ -105,7 +105,17 @@ public class Data {
     }
 
     public static boolean modifyVote(String id, String type, String newValue) {
-        return VoteInFile.modifyVoteFile(id ,type, newValue);
+        if (VoteInFile.modifyVoteFile(id, type, newValue)) {
+            for (VoteTask inListTask : VOTE_TASKS) {
+                if (isInteger(id) && inListTask.getTaskId() == Integer.parseInt(id)) {
+                    VOTE_TASKS.iterator().remove();
+                    loadVoteTaskFromFile(plugin);
+                    return true;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     public static void loadVoteTaskFromFile(Plugin plugin){
@@ -115,8 +125,8 @@ public class Data {
                 YamlConfiguration yamlVoteFile = YamlConfiguration.loadConfiguration(voteFile);
                 if (voteFile.getName().equals(yamlVoteFile.get("Name") + ".yml")) {
                     if (VOTE_TASKS.size() != 0) {
-                        for (VoteTask inListTask : VOTE_TASKS) {
-                            boolean isLoad = inListTask.getTaskId() == yamlVoteFile.getInt("TaskID");
+                        for (int i = 0; i < VOTE_TASKS.size(); i++) {
+                            boolean isLoad = VOTE_TASKS.get(i).getTaskId() == yamlVoteFile.getInt("TaskID");
                             if (!isLoad) {
                                 addVoteInListFromFile(yamlVoteFile);
                             }
@@ -138,33 +148,51 @@ public class Data {
         }
     }
 
-    public static void showResult(List<Player> approvePlayers, List<Player> disApprovePlayers) {
-        StringBuilder yesPlayer = new StringBuilder();
-        StringBuilder disPlayer = new StringBuilder();
-        for (int i = 0; i < approvePlayers.size(); i++) {
-            yesPlayer.append(approvePlayers.get(i).getName()).append(approvePlayers.size() - 1 == i ? "，" : "");
-        }
-        for (int i = 0; i < disApprovePlayers.size(); i++) {
-            disPlayer.append(disApprovePlayers.get(i).getName()).append(disApprovePlayers.size() - 1 == i ? "，" : "");
-        }
-        Bukkit.broadcastMessage("赞成玩家：" + yesPlayer);
-        Bukkit.broadcastMessage("反对玩家：" + disPlayer);
+    public static String replaceCommand(String inputCommand) {
+        return inputCommand.replace("_", " ");
     }
 
     public static void calcResult(VoteTask voteTask) {
         switch (Arithmetic.result(voteTask.votes)) {
             case 1:
-                Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), voteTask.getCommand());
-                Bukkit.broadcastMessage("投票通过");
+                Bukkit.broadcastMessage("[SakuraVote]投票通过");
+                Bukkit.broadcastMessage("[SakuraVote]将在5秒后执行任务：" + voteTask.getTaskName());
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        int time = 5;
+                        while (time >= 0) {
+                            Bukkit.broadcastMessage(time-- + "");
+                            try {
+                                Thread.sleep(1000);
+                            } catch (Exception ignore) {}
+                        }
+                        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), voteTask.getCommand());
+                        cancel();
+                    }
+                }.runTaskAsynchronously(plugin);
                 break;
             case 0:
-                Bukkit.broadcastMessage("投票不通过");
+                Bukkit.broadcastMessage("[SakuraVote]投票不通过");
                 break;
             case -1:
             default:
-                Bukkit.broadcastMessage("投票人数小于在线人数的一半，本次结果无效");
+                Bukkit.broadcastMessage("[SakuraVote]投票人数小于在线人数的一半，本次结果无效");
                 break;
         }
+    }
+
+    public static void showResult(List<Player> approvePlayers, List<Player> disApprovePlayers) {
+        StringBuilder yesPlayer = new StringBuilder();
+        StringBuilder disPlayer = new StringBuilder();
+        for (int i = 0; i < approvePlayers.size(); i++) {
+            yesPlayer.append(approvePlayers.get(i).getName()).append(approvePlayers.size() - 1 == i ? "" : "，");
+        }
+        for (int i = 0; i < disApprovePlayers.size(); i++) {
+            disPlayer.append(disApprovePlayers.get(i).getName()).append(disApprovePlayers.size() - 1 == i ? "" : "，");
+        }
+        Bukkit.broadcastMessage("[SakuraVote]赞成玩家：" + yesPlayer);
+        Bukkit.broadcastMessage("[SakuraVote]反对玩家：" + disPlayer);
     }
 
     public static long transformTime(String stringDate) {
@@ -175,7 +203,6 @@ public class Data {
             Date date = sdf.parse(stringDate);
             time = date.getTime();
         } catch (Exception e) {
-            e.printStackTrace();
             return -1;
         }
         return time;
@@ -183,7 +210,7 @@ public class Data {
 
     public static long verifyReleaseTime(VoteTask voteTask) {
         long releaseTime = transformTime(voteTask.getReleaseTime()) - System.currentTimeMillis();
-        return releaseTime > 0 ? -1 : releaseTime;
+        return releaseTime > 0 ? releaseTime : -1;
     }
 
     public static boolean verifyTimePatternCorrect(String stringDate) {

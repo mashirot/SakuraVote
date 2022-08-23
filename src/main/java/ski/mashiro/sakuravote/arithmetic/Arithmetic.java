@@ -1,8 +1,8 @@
-package ski.mashiro.vote.arithmetic;
+package ski.mashiro.sakuravote.arithmetic;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import ski.mashiro.vote.storage.Data;
+import ski.mashiro.sakuravote.storage.Data;
 
 import java.util.*;
 
