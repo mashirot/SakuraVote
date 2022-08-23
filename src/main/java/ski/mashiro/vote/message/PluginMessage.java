@@ -15,7 +15,7 @@ public class PluginMessage {
     public static void showHelp(CommandSender commandSender) {
         commandSender.sendMessage(DARK_GREEN + "==============Vote==============");
         commandSender.sendMessage(GREEN + "1. /vote create [投票名] [投票id] [通过后执行的指令] [发布时间] [有效时间]");
-        commandSender.sendMessage(GREEN + "说明：指令不需要带 /，发布时间格式 [yyyy-MM-dd hh:MM:ss]，有效时间以[秒]为单位，1分钟就填 60");
+        commandSender.sendMessage(GREEN + "说明：指令不需要带 /，发布时间格式 [yyyy-MM-dd|hh:MM:ss]，有效时间以[秒]为单位，1分钟就填 60");
         commandSender.sendMessage(GREEN + "2. /vote del [投票id]");
         commandSender.sendMessage(GREEN + "3. /vote approve [投票id]");
         commandSender.sendMessage(GREEN + "4. /vote disapprove [投票id]");

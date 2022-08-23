@@ -7,7 +7,7 @@
 #releaseTime:
 #effectTime:
 TaskID: 6657
-Name: Eg
+Name: VoteEg
 Command: stop
 releaseTime: 2042/01/01 00:00:00
 # 10min = 10*60s = 600s

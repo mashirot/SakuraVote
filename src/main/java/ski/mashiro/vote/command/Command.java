@@ -101,14 +101,16 @@ public class Command implements CommandExecutor {
 
             case LIST:
                 if (strings.length == 1) {
-                    if (Data.VOTE_TASKS != null) {
+                    if (Data.VOTE_TASKS.size() != 0) {
                         for (VoteTask voteTask : Data.VOTE_TASKS) {
-                            commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName()
-                                    + "  执行指令：" + voteTask.getCommand() + "  发布时间：" + voteTask.getReleaseTime());
+                            commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName() + "  执行指令：" + voteTask.getCommand()
+                                    + "  发布时间：" + voteTask.getReleaseTime() + "  投票时长：" + voteTask.getEffectTime());
                         }
                     }else {
                         commandSender.sendMessage("暂无投票");
                     }
+                }else {
+                    commandSender.sendMessage("输入有误，请输入/vote 查看使用说明");
                 }
                 break;
 

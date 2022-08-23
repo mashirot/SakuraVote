@@ -113,18 +113,28 @@ public class Data {
         if (voteFiles != null) {
             for (File voteFile : voteFiles) {
                 YamlConfiguration yamlVoteFile = YamlConfiguration.loadConfiguration(voteFile);
-                for (VoteTask inListTask : VOTE_TASKS) {
-                    boolean isLoad = inListTask.getTaskId() == yamlVoteFile.getInt("TaskID");
-                    if (!isLoad) {
-                        VoteTask newTask = new VoteTask(yamlVoteFile.getString("Name"), yamlVoteFile.getInt("TaskID"), yamlVoteFile.getString("Command"),
-                                yamlVoteFile.getString("releaseTime"), yamlVoteFile.getInt("effectTime"), yamlVoteFile.getBoolean("reuse"));
-                        VOTE_TASKS.add(newTask);
-                        if (verifyReleaseTime(newTask) != -1) {
-                            Timer.checkTimeToRun(newTask);
+                if (voteFile.getName().equals(yamlVoteFile.get("Name") + ".yml")) {
+                    if (VOTE_TASKS.size() != 0) {
+                        for (VoteTask inListTask : VOTE_TASKS) {
+                            boolean isLoad = inListTask.getTaskId() == yamlVoteFile.getInt("TaskID");
+                            if (!isLoad) {
+                                addVoteInListFromFile(yamlVoteFile);
+                            }
                         }
+                    }else {
+                        addVoteInListFromFile(yamlVoteFile);
                     }
                 }
             }
+        }
+    }
+
+    public static void addVoteInListFromFile(YamlConfiguration yamlVoteFile) {
+        VoteTask newTask = new VoteTask(yamlVoteFile.getString("Name"), yamlVoteFile.getInt("TaskID"), yamlVoteFile.getString("Command"),
+                yamlVoteFile.getString("releaseTime"), yamlVoteFile.getInt("effectTime"), yamlVoteFile.getBoolean("reuse"));
+        VOTE_TASKS.add(newTask);
+        if (verifyReleaseTime(newTask) != -1) {
+            Timer.checkTimeToRun(newTask);
         }
     }
 
@@ -159,7 +169,7 @@ public class Data {
 
     public static long transformTime(String stringDate) {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd|HH:mm:ss");
         long time;
         try {
             Date date = sdf.parse(stringDate);
@@ -177,7 +187,7 @@ public class Data {
     }
 
     public static boolean verifyTimePatternCorrect(String stringDate) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd|HH:mm:ss");
         try {
             sdf.parse(stringDate);
             return true;

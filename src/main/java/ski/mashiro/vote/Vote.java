@@ -6,6 +6,7 @@ import ski.mashiro.vote.command.Command;
 import ski.mashiro.vote.storage.CreateEg;
 import ski.mashiro.vote.storage.Data;
 
+
 /**
  * @author MashiroT
  */
