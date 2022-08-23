@@ -18,25 +18,26 @@ import java.util.List;
  */
 public class Data {
 
-    public static List<VoteTask> voteTasks = new ArrayList<>();
+    public static final List<VoteTask> VOTE_TASKS = new ArrayList<>();
     public static Plugin plugin;
 
     private Data() {}
 
     public static boolean addVote(String name, String id, String command, String releaseTime, String effectTime) {
-        VoteTask task = new VoteTask();
-        if (task.setTaskIdOut(id)) {
-            if (!VoteWithFile.isFileExist(Integer.parseInt(id))) {
+        if (isInteger(id) && isInteger(effectTime) && verifyTimePatternCorrect(releaseTime)) {
+            if (!VoteInFile.isFileExist(Integer.parseInt(id))) {
+                VoteTask task = new VoteTask();
+                task.setTaskId(Integer.parseInt(id));
                 task.setTaskName(name);
                 task.setCommand(command);
-                if (verifyTimePatternCorrect(releaseTime)) {
-                    task.setReleaseTime(releaseTime);
-                    if (task.setEffectTimeOut(effectTime)) {
-                        if (storeVoteTasks(task)) {
-                            voteTasks.add(task);
-                            return true;
-                        }
+                task.setReleaseTime(releaseTime);
+                task.setEffectTime(Integer.parseInt(effectTime));
+                if (storeVoteTasks(task)) {
+                    VOTE_TASKS.add(task);
+                    if (verifyReleaseTime(task) != -1) {
+                        Timer.checkTimeToRun(task);
                     }
+                    return true;
                 }
             }
         }
@@ -44,34 +45,33 @@ public class Data {
     }
 
     public static boolean storeVoteTasks(VoteTask voteTask) {
-        return VoteWithFile.createVoteFile(voteTask);
+        return VoteInFile.createVoteFile(voteTask);
     }
 
     public static boolean delVote(String id){
-        try {
+        if (isInteger(id)) {
             int delId = Integer.parseInt(id);
-            for (VoteTask task : voteTasks) {
-                if (VoteWithFile.isFileExist(delId)) {
+            for (VoteTask task : VOTE_TASKS) {
+                if (VoteInFile.isFileExist(delId)) {
                     if (delId == task.getTaskId() && !task.isStart()) {
-                        if (VoteWithFile.deleteVoteFile(delId)) {
+                        if (VoteInFile.deleteVoteFile(delId)) {
                             Timer.cancelTask(delId + "");
-                            voteTasks.remove(task);
+                            VOTE_TASKS.remove(task);
                             return true;
                         }
                     }
                 }
             }
-            return false;
-        } catch (Exception e) {
-            return false;
         }
+
+        return false;
     }
 
     public static boolean approveVote(Player player, String taskId){
 
         try {
             int id = Integer.parseInt(taskId);
-            for (VoteTask task : voteTasks) {
+            for (VoteTask task : VOTE_TASKS) {
                 if (id == task.getTaskId()) {
                     if (task.isStart() && !task.votes.containsValue(player)) {
                         task.votes.put(0, player);
@@ -88,7 +88,7 @@ public class Data {
     public static boolean disApproveVote(Player player, String taskId) {
         try {
             int id = Integer.parseInt(taskId);
-            for (VoteTask task : voteTasks) {
+            for (VoteTask task : VOTE_TASKS) {
                 if (id == task.getTaskId()) {
                     if (task.isStart()) {
                         if (task.isStart() && !task.votes.containsValue(player)) {
@@ -105,7 +105,7 @@ public class Data {
     }
 
     public static boolean modifyVote(String id, String type, String newValue) {
-        return VoteWithFile.modifyVoteFile(id ,type, newValue);
+        return VoteInFile.modifyVoteFile(id ,type, newValue);
     }
 
     public static void loadVoteTaskFromFile(Plugin plugin){
@@ -113,13 +113,13 @@ public class Data {
         if (voteFiles != null) {
             for (File voteFile : voteFiles) {
                 YamlConfiguration yamlVoteFile = YamlConfiguration.loadConfiguration(voteFile);
-                for (VoteTask inListTask : voteTasks) {
+                for (VoteTask inListTask : VOTE_TASKS) {
                     boolean isLoad = inListTask.getTaskId() == yamlVoteFile.getInt("TaskID");
                     if (!isLoad) {
                         VoteTask newTask = new VoteTask(yamlVoteFile.getString("Name"), yamlVoteFile.getInt("TaskID"), yamlVoteFile.getString("Command"),
                                 yamlVoteFile.getString("releaseTime"), yamlVoteFile.getInt("effectTime"), yamlVoteFile.getBoolean("reuse"));
+                        VOTE_TASKS.add(newTask);
                         if (verifyReleaseTime(newTask) != -1) {
-                            voteTasks.add(newTask);
                             Timer.checkTimeToRun(newTask);
                         }
                     }
@@ -129,7 +129,6 @@ public class Data {
     }
 
     public static void showResult(List<Player> approvePlayers, List<Player> disApprovePlayers) {
-
         StringBuilder yesPlayer = new StringBuilder();
         StringBuilder disPlayer = new StringBuilder();
         for (int i = 0; i < approvePlayers.size(); i++) {
@@ -138,7 +137,6 @@ public class Data {
         for (int i = 0; i < disApprovePlayers.size(); i++) {
             disPlayer.append(disApprovePlayers.get(i).getName()).append(disApprovePlayers.size() - 1 == i ? "，" : "");
         }
-
         Bukkit.broadcastMessage("赞成玩家：" + yesPlayer);
         Bukkit.broadcastMessage("反对玩家：" + disPlayer);
     }
@@ -157,21 +155,6 @@ public class Data {
                 Bukkit.broadcastMessage("投票人数小于在线人数的一半，本次结果无效");
                 break;
         }
-    }
-
-    public static boolean modifyTaskReuse(String modifyId) {
-        try {
-            int id = Integer.parseInt(modifyId);
-            for (VoteTask voteTask : voteTasks) {
-                if (id == voteTask.getTaskId()) {
-                    voteTask.reuse();
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     public static long transformTime(String stringDate) {
@@ -199,6 +182,15 @@ public class Data {
             sdf.parse(stringDate);
             return true;
         } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isInteger(String stringInt) {
+        try {
+            Integer.parseInt(stringInt);
+            return true;
+        }catch (Exception e) {
             return false;
         }
     }

@@ -19,7 +19,7 @@ public class VoteTask {
     private boolean isReuse;
     private boolean isCancel;
 
-    public HashMap<Integer, Player> votes = new HashMap<>();
+    public final HashMap<Integer, Player> votes = new HashMap<>();
 
     public VoteTask() {
     }
@@ -45,10 +45,6 @@ public class VoteTask {
         return isReuse;
     }
 
-    public void reuse() {
-        isReuse = !isReuse;
-    }
-
     public boolean isStart() {
         return isStart;
     }
@@ -57,20 +53,11 @@ public class VoteTask {
         isStart = !isStart;
     }
 
-    public boolean setEffectTimeOut(String time) {
-        try {
-            setEffectTime(Integer.parseInt(time));
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     public int getEffectTime() {
         return effectTime;
     }
 
-    private void setEffectTime(int effectTime) {
+    public void setEffectTime(int effectTime) {
         this.effectTime = effectTime;
     }
 
@@ -101,14 +88,6 @@ public class VoteTask {
         return taskId;
     }
 
-    public boolean setTaskIdOut(String taskId) {
-        try {
-            setTaskId(Integer.parseInt(taskId));
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
     public void setTaskId(int taskId) {
         this.taskId = taskId;
     }

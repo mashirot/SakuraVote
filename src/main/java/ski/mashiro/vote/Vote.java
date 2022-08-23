@@ -19,10 +19,10 @@ public class Vote extends JavaPlugin {
     @Override
     public void onEnable() {
         Bukkit.getPluginCommand("vote").setExecutor(new Command());
+        Data.plugin = this;
         this.saveDefaultConfig();
         CreateEg.isFolderExist(this);
         Data.loadVoteTaskFromFile(this);
-        Data.plugin = this;
         getLogger().info("Vote投票插件启动成功");
     }
 

@@ -3,7 +3,7 @@ package ski.mashiro.vote.command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import ski.mashiro.vote.message.Message;
+import ski.mashiro.vote.message.PluginMessage;
 import ski.mashiro.vote.storage.Data;
 import ski.mashiro.vote.storage.VoteTask;
 import ski.mashiro.vote.timer.Timer;
@@ -20,7 +20,6 @@ public class Command implements CommandExecutor {
     private static final String DISAPPROVE = "disapprove";
     private static final String LIST = "list";
     private static final String SET = "set";
-    private static final String REUSE = "reuse";
     private static final String CANCEL = "cancel";
     private static final int TASK_NAME = 1;
     private static final int TASK_ID = 2;
@@ -35,8 +34,6 @@ public class Command implements CommandExecutor {
     private static final int TASK_MODIFY_TYPE = 2;
     private static final int TASK_MODIFY_VALUE = 3;
     private static final int TASK_MODIFY_CORRECT_LENGTH = 4;
-    private static final int TASK_REUSE_ID = 1;
-    private static final int TASK_REUSE_CORRECT_LENGTH = 2;
     private static final int TASK_CANCEL_ID = 1;
     private static final int TASK_CANCEL_CORRECT_LENGTH = 2;
 
@@ -44,7 +41,7 @@ public class Command implements CommandExecutor {
     public boolean onCommand(CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
 
         if (strings.length == 0) {
-            Message.showHelp(commandSender);
+            PluginMessage.showHelp(commandSender);
             return true;
         }
         String cmd = strings[0];
@@ -56,11 +53,11 @@ public class Command implements CommandExecutor {
                         if (Data.addVote(strings[TASK_NAME], strings[TASK_ID], strings[TASK_COMMAND], strings[TASK_RELEASE_TIME], strings[TASK_EFFECT_TIME])) {
                             commandSender.sendMessage("投票创建成功，id：" + strings[TASK_ID]);
                         }else {
-                            commandSender.sendMessage("投票创建失败，可能原因：[投票id]为数字，VoteList文件夹下有相同[投票名]文件");
+                            commandSender.sendMessage("投票创建失败，可能原因：[投票id]为数字，[投票id]重复");
                         }
                     }
                 }catch (Exception e){
-                    Message.showCreateErrMessage(commandSender);
+                    PluginMessage.showCreateErrMessage(commandSender);
                 }
                 break;
             case DEL:
@@ -69,7 +66,7 @@ public class Command implements CommandExecutor {
                     if (Data.delVote(strings[1])) {
                         commandSender.sendMessage("投票删除成功");
                     }else {
-                        Message.showDelErrMessage(commandSender);
+                        PluginMessage.showDelErrMessage(commandSender);
                     }
                 }
                 break;
@@ -104,10 +101,10 @@ public class Command implements CommandExecutor {
 
             case LIST:
                 if (strings.length == 1) {
-                    if (Data.voteTasks != null) {
-                        for (VoteTask voteTask : Data.voteTasks) {
+                    if (Data.VOTE_TASKS != null) {
+                        for (VoteTask voteTask : Data.VOTE_TASKS) {
                             commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName()
-                                    + "  执行指令：" + voteTask.getCommand() + "  定时：" + voteTask.getReleaseTime());
+                                    + "  执行指令：" + voteTask.getCommand() + "  发布时间：" + voteTask.getReleaseTime());
                         }
                     }else {
                         commandSender.sendMessage("暂无投票");
@@ -124,16 +121,6 @@ public class Command implements CommandExecutor {
                     commandSender.sendMessage("修改失败，请重试");
                 }else {
                     commandSender.sendMessage("输入有误，请输入/vote 查看使用说明");
-                }
-                break;
-
-            case REUSE:
-                if (strings[TASK_REUSE_ID] != null && strings.length == TASK_REUSE_CORRECT_LENGTH) {
-                    if (Data.modifyTaskReuse(strings[TASK_REUSE_ID])) {
-                        commandSender.sendMessage("修改成功，投票id：" + strings[TASK_REUSE_ID]);
-                    }else {
-                        commandSender.sendMessage("修改失败，投票id输入有误");
-                    }
                 }
                 break;
 
