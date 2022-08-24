@@ -1,11 +1,13 @@
 package ski.mashiro.sakuravote.storage;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import ski.mashiro.sakuravote.arithmetic.Arithmetic;
+import ski.mashiro.sakuravote.command.Command;
 import ski.mashiro.sakuravote.timer.Timer;
 
 import java.io.File;
@@ -13,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static org.bukkit.ChatColor.*;
 
 /**
  * @author MashiroT
@@ -52,12 +56,13 @@ public class Data {
     public static boolean delVote(String id) {
         if (isInteger(id)) {
             int delId = Integer.parseInt(id);
-            for (VoteTask task : VOTE_TASKS) {
+
+            for (int i = 0; i < VOTE_TASKS.size(); i++) {
                 if (VoteInFile.isFileExist(delId)) {
-                    if (delId == task.getTaskId() && !task.isStart()) {
+                    if (delId == VOTE_TASKS.get(i).getTaskId() && !VOTE_TASKS.get(i).isStart()) {
                         if (VoteInFile.deleteVoteFile(delId)) {
                             Timer.cancelTask(delId + "");
-                            VOTE_TASKS.iterator().remove();
+                            VOTE_TASKS.remove(VOTE_TASKS.get(i));
                             return true;
                         }
                     }
@@ -106,9 +111,9 @@ public class Data {
 
     public static boolean modifyVote(String id, String type, String newValue) {
         if (VoteInFile.modifyVoteFile(id, type, newValue)) {
-            for (VoteTask inListTask : VOTE_TASKS) {
-                if (isInteger(id) && inListTask.getTaskId() == Integer.parseInt(id)) {
-                    VOTE_TASKS.iterator().remove();
+            for (int i = 0; i < VOTE_TASKS.size(); i++) {
+                if (isInteger(id) && VOTE_TASKS.get(i).getTaskId() == Integer.parseInt(id)) {
+                    VOTE_TASKS.remove(VOTE_TASKS.get(i));
                     loadVoteTaskFromFile(plugin);
                     return true;
                 }
@@ -128,30 +133,66 @@ public class Data {
                         for (int i = 0; i < VOTE_TASKS.size(); i++) {
                             boolean isLoad = VOTE_TASKS.get(i).getTaskId() == yamlVoteFile.getInt("TaskID");
                             if (!isLoad) {
-                                addVoteToListFromFile(yamlVoteFile);
+                                VOTE_TASKS.add(addVoteToListFromFile(yamlVoteFile));
                             }
                         }
                     }else {
-                        addVoteToListFromFile(yamlVoteFile);
+                        VOTE_TASKS.add(addVoteToListFromFile(yamlVoteFile));
                     }
                 }
             }
         }
     }
 
-    public static void addVoteToListFromFile(YamlConfiguration yamlVoteFile) {
+    public static VoteTask addVoteToListFromFile(YamlConfiguration yamlVoteFile) {
         VoteTask newTask = new VoteTask(yamlVoteFile.getString("Name"), yamlVoteFile.getInt("TaskID"), yamlVoteFile.getString("Command"),
                 yamlVoteFile.getString("releaseTime"), yamlVoteFile.getInt("effectTime"), yamlVoteFile.getBoolean("reuse"));
-        VOTE_TASKS.add(newTask);
         if (verifyReleaseTime(newTask) != -1) {
             Timer.checkTimeToRun(newTask);
         }
+        return newTask;
     }
 
     public static void reloadTaskAndConfig() {
         VOTE_TASKS.clear();
         loadVoteTaskFromFile(plugin);
         plugin.reloadConfig();
+        plugin.getConfig();
+    }
+
+    public static boolean showList(String type, CommandSender commandSender) {
+        switch (type.toLowerCase()) {
+            case Command.LIST_TYPE_GOING:
+                if (VOTE_TASKS.size() != 0) {
+                    for (VoteTask voteTask : VOTE_TASKS) {
+                        if (!voteTask.isStart() && voteTask.getThreadId() != 0) {
+                            commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName() + "  执行指令：" + voteTask.getCommand()
+                                    + "  发布时间：" + voteTask.getReleaseTime() + "  投票时长：" + voteTask.getEffectTime() + "秒" + "  是否循环：" + voteTask.isReuse());
+                        } else {
+                            commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无未开始的投票");
+                        }
+                    }
+                } else {
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无未开始的投票");
+                }
+                return true;
+            case Command.LIST_TYPE_ALL:
+                if (VOTE_TASKS.size() != 0) {
+                    commandSender.sendMessage(DARK_GREEN + "==============SakuraVote==============");
+                    for (VoteTask voteTask : VOTE_TASKS) {
+                        if (!voteTask.isStart() && voteTask.getThreadId() != 0) {
+                            commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName() + "  执行指令：" + voteTask.getCommand()
+                                    + "  发布时间：" + voteTask.getReleaseTime() + "  投票时长：" + voteTask.getEffectTime() + "秒" + "  是否循环：" + voteTask.isReuse());
+                        }
+                    }
+                    commandSender.sendMessage(DARK_GREEN + "======================================");
+                } else {
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无投票");
+                }
+                return true;
+            default:
+                return false;
+        }
     }
 
     public static String replaceCommand(String inputCommand) {

@@ -17,12 +17,11 @@ public class VoteTask {
     private int effectTime;
     private boolean isStart;
     private boolean isReuse;
-    private boolean isCancel;
+    private int threadId = 0;
 
     public final HashMap<Integer, Player> votes = new HashMap<>();
 
-    public VoteTask() {
-    }
+    public VoteTask() {}
 
     public VoteTask(String taskName, int taskId, String command, String releaseTime, int effectTime, boolean isReuse) {
         this.taskName = taskName;
@@ -33,12 +32,12 @@ public class VoteTask {
         this.isReuse = isReuse;
     }
 
-    public boolean isCancel() {
-        return isCancel;
+    public int getThreadId() {
+        return threadId;
     }
 
-    public void setCancel(boolean cancel) {
-        isCancel = cancel;
+    public void setThreadId(int threadId) {
+        this.threadId = threadId;
     }
 
     public boolean isReuse() {

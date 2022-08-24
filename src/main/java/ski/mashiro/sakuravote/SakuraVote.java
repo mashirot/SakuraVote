@@ -2,7 +2,7 @@ package ski.mashiro.sakuravote;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import ski.mashiro.sakuravote.bStats.Metrics;
+import ski.mashiro.sakuravote.bstats.Metrics;
 import ski.mashiro.sakuravote.command.Command;
 import ski.mashiro.sakuravote.storage.CreateEg;
 import ski.mashiro.sakuravote.storage.Data;

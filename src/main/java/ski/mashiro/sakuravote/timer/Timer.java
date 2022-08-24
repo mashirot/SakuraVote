@@ -2,6 +2,7 @@ package ski.mashiro.sakuravote.timer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import ski.mashiro.sakuravote.storage.Data;
 import ski.mashiro.sakuravote.storage.VoteInFile;
 import ski.mashiro.sakuravote.storage.VoteTask;
@@ -21,35 +22,32 @@ public class Timer {
     public static void checkTimeToRun(VoteTask voteTask) {
         long releaseTime = verifyReleaseTime(voteTask);
         if (releaseTime != -1) {
-            new BukkitRunnable() {
+            BukkitTask delay = new BukkitRunnable() {
                 @Override
                 public void run() {
-                    int taskId = getTaskId();
-                    Bukkit.broadcastMessage("[SakuraVote]即将开始投票");
-                    Bukkit.broadcastMessage("[SakuraVote]投票名：" + voteTask.getTaskName());
-                    Bukkit.broadcastMessage("[SakuraVote]投票ID：" + voteTask.getTaskId());
-                    Bukkit.broadcastMessage("[SakuraVote]投票时间：" + voteTask.getEffectTime() + "秒");
-                    Bukkit.broadcastMessage("[SakuraVote]输入/vote [approve/disapprove] " + voteTask.getTaskId() + " 进行支持或反对");
+                    Bukkit.broadcastMessage("[SakuraVote] 即将开始投票");
+                    Bukkit.broadcastMessage("[SakuraVote] 投票名：" + voteTask.getTaskName());
+                    Bukkit.broadcastMessage("[SakuraVote] 投票ID：" + voteTask.getTaskId());
+                    Bukkit.broadcastMessage("[SakuraVote] 投票时间：" + voteTask.getEffectTime() + "秒");
+                    Bukkit.broadcastMessage("[SakuraVote] 输入/vote [approve/disapprove] " + voteTask.getTaskId() + " 进行支持或反对");
                     voteTask.changeVoteState();
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            Bukkit.broadcastMessage("[SakuraVote]投票结束");
+                            Bukkit.broadcastMessage("[SakuraVote] 投票结束");
                             voteTask.changeVoteState();
                             Data.calcResult(voteTask);
-                            Bukkit.getScheduler().cancelTask(taskId);
+                            Bukkit.getScheduler().cancelTask(voteTask.getTaskId());
+                            voteTask.setTaskId(0);
                             if (voteTask.isReuse()) {
                                 isReuse(voteTask);
                             }
                             cancel();
                         }
                     }.runTaskLaterAsynchronously(Data.plugin, voteTask.getEffectTime() * 20L);
-                    while (voteTask.isCancel()) {
-                        voteTask.setCancel(false);
-                        cancel();
-                    }
                 }
             }.runTaskLaterAsynchronously(Data.plugin, releaseTime / 1000 * 20);
+            voteTask.setThreadId(delay.getTaskId());
         }
     }
 
@@ -57,9 +55,10 @@ public class Timer {
         if (isInteger(cancelId)) {
             int id = Integer.parseInt(cancelId);
             for (VoteTask voteTask : Data.VOTE_TASKS) {
-                if (voteTask.isStart()) {
-                    if (voteTask.getTaskId() == id) {
-                        voteTask.setCancel(true);
+                if (voteTask.getTaskId() == id) {
+                    if (voteTask.getThreadId() != 0) {
+                        Bukkit.getScheduler().cancelTask(voteTask.getThreadId());
+                        voteTask.setThreadId(0);
                         return true;
                     }
                 }
@@ -83,4 +82,5 @@ public class Timer {
             e.printStackTrace();
         }
     }
+
 }

@@ -1,4 +1,4 @@
-package ski.mashiro.sakuravote.bStats;
+package ski.mashiro.sakuravote.bstats;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
