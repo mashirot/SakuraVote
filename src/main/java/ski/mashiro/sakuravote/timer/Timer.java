@@ -8,9 +8,10 @@ import ski.mashiro.sakuravote.storage.VoteInFile;
 import ski.mashiro.sakuravote.storage.VoteTask;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
-import static ski.mashiro.sakuravote.storage.Data.isInteger;
-import static ski.mashiro.sakuravote.storage.Data.verifyReleaseTime;
+import static ski.mashiro.sakuravote.storage.Data.*;
 
 /**
  * @author MashiroT
@@ -41,6 +42,7 @@ public class Timer {
                             voteTask.setTaskId(0);
                             if (voteTask.isReuse()) {
                                 isReuse(voteTask);
+                                loadSpecifyVoteFromFile(voteTask.getTaskId() + "");
                             }
                             cancel();
                         }
@@ -69,18 +71,25 @@ public class Timer {
 
     public static void isReuse(VoteTask voteTask) {
         try {
-            Data.VOTE_TASKS.remove(voteTask);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd|HH:mm:ss");
-            long longDate = sdf.parse(voteTask.getReleaseTime()).getTime();
-            if (longDate - System.currentTimeMillis() < 0) {
-                longDate += (86400 * 1000);
-                voteTask.setReleaseTime(sdf.format(longDate));
+            Date oldDate = sdf.parse(voteTask.getReleaseTime());
+
+            Calendar settingTime = Calendar.getInstance();
+            settingTime.setTime(oldDate);
+            Calendar newTime = Calendar.getInstance();
+
+            if (settingTime.getTime().getTime() < newTime.getTime().getTime()) {
+                newTime.set(Calendar.HOUR_OF_DAY, settingTime.get(Calendar.HOUR_OF_DAY));
+                newTime.set(Calendar.MINUTE, settingTime.get(Calendar.MINUTE));
+                newTime.set(Calendar.SECOND, settingTime.get(Calendar.SECOND));
+                voteTask.setReleaseTime(sdf.format(newTime.getTime()));
                 VoteInFile.modifyReuseTime(voteTask);
-                Data.loadVoteTaskFromFile(Data.plugin);
+                Data.VOTE_TASKS.remove(voteTask);
+                VOTE_TASKS.add(voteTask);
+                checkTimeToRun(voteTask);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 }

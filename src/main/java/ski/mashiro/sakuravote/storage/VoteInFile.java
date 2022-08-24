@@ -97,11 +97,17 @@ public class VoteInFile {
                                     yamlVoteFile.save(voteFile);
                                     return true;
                                 case REUSE:
-                                    if ("true".equalsIgnoreCase(newValue) || "false".equalsIgnoreCase(newValue)) {
-                                        yamlVoteFile.set("reuse", newValue);
-                                        return true;
-                                    }else {
-                                        return false;
+                                    switch (newValue.toLowerCase()) {
+                                        case "true":
+                                            yamlVoteFile.set("reuse", true);
+                                            yamlVoteFile.save(voteFile);
+                                            return true;
+                                        case "false":
+                                            yamlVoteFile.set("reuse", false);
+                                            yamlVoteFile.save(voteFile);
+                                            return true;
+                                        default:
+                                            return false;
                                     }
                                 default:
                                     return false;
@@ -134,11 +140,31 @@ public class VoteInFile {
         if (voteFiles != null) {
             for (File voteFile : voteFiles) {
                 YamlConfiguration yamlVoteFile = YamlConfiguration.loadConfiguration(voteFile);
-                if (voteTask.getTaskId() == yamlVoteFile.getInt("TaskID")) {
-                    yamlVoteFile.set("releaseTime", voteTask.getReleaseTime());
+                try {
+                    if (voteTask.getTaskId() == yamlVoteFile.getInt("TaskID")) {
+                        yamlVoteFile.set("releaseTime", voteTask.getReleaseTime());
+                        yamlVoteFile.save(voteFile);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
+    }
+
+    public static YamlConfiguration findSpecifyVoteFile(String id) {
+        if (Data.isInteger(id)) {
+            File[] voteFiles = new File(Data.plugin.getDataFolder() + "/VoteList").listFiles();
+            if (voteFiles != null) {
+                for (File voteFile : voteFiles) {
+                    YamlConfiguration yamlVoteFile = YamlConfiguration.loadConfiguration(voteFile);
+                    if (Integer.parseInt(id) == yamlVoteFile.getInt("TaskID")) {
+                        return yamlVoteFile;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

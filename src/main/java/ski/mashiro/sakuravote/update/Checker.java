@@ -24,11 +24,11 @@ public class Checker {
             return;
         }
 
-        Bukkit.getConsoleSender().sendMessage("[SakuraVote]检查更新中...");
+        Bukkit.getConsoleSender().sendMessage("[SakuraVote] 检查更新中...");
         try {
             updateUrl = new URL("https://update.check.mashiro.ski/SakuraVoteVersion.txt");
         }catch (Exception e) {
-            Bukkit.getConsoleSender().sendMessage("[SakuraVote]无法连接到更新服务器");
+            Bukkit.getConsoleSender().sendMessage("[SakuraVote] 无法连接到更新服务器");
         }
         new BukkitRunnable() {
             String latestVersion;
@@ -42,9 +42,9 @@ public class Checker {
                     e.printStackTrace();
                 }
                 if (plugin.getDescription().getVersion().equals(latestVersion)) {
-                    Bukkit.getConsoleSender().sendMessage("[SakuraVote]当前为最新版本，感谢您的使用");
+                    Bukkit.getConsoleSender().sendMessage("[SakuraVote] 当前为最新版本，感谢您的使用");
                 }else {
-                    Bukkit.getConsoleSender().sendMessage("[SakuraVote]当前有更新可用，请前往MCBBS发布贴下载");
+                    Bukkit.getConsoleSender().sendMessage("[SakuraVote] 当前有更新可用，请前往MCBBS发布贴下载");
                 }
             }
         }.runTaskAsynchronously(plugin);

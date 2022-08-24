@@ -114,7 +114,7 @@ public class Data {
             for (int i = 0; i < VOTE_TASKS.size(); i++) {
                 if (isInteger(id) && VOTE_TASKS.get(i).getTaskId() == Integer.parseInt(id)) {
                     VOTE_TASKS.remove(VOTE_TASKS.get(i));
-                    loadVoteTaskFromFile(plugin);
+                    loadSpecifyVoteFromFile(id);
                     return true;
                 }
             }
@@ -123,7 +123,7 @@ public class Data {
         return false;
     }
 
-    public static void loadVoteTaskFromFile(Plugin plugin){
+    public static void loadVoteTaskFromFile(Plugin plugin) {
         File[] voteFiles = new File(plugin.getDataFolder() + "/VoteList").listFiles();
         if (voteFiles != null) {
             for (File voteFile : voteFiles) {
@@ -133,11 +133,19 @@ public class Data {
                         for (int i = 0; i < VOTE_TASKS.size(); i++) {
                             boolean isLoad = VOTE_TASKS.get(i).getTaskId() == yamlVoteFile.getInt("TaskID");
                             if (!isLoad) {
-                                VOTE_TASKS.add(addVoteToListFromFile(yamlVoteFile));
+                                VoteTask newTask = addVoteToListFromFile(yamlVoteFile);
+                                VOTE_TASKS.add(newTask);
+                                if (newTask.isReuse()) {
+                                    Timer.isReuse(newTask);
+                                }
                             }
                         }
                     }else {
-                        VOTE_TASKS.add(addVoteToListFromFile(yamlVoteFile));
+                        VoteTask newTask = addVoteToListFromFile(yamlVoteFile);
+                        VOTE_TASKS.add(newTask);
+                        if (newTask.isReuse()) {
+                            Timer.isReuse(newTask);
+                        }
                     }
                 }
             }
@@ -153,6 +161,21 @@ public class Data {
         return newTask;
     }
 
+    public static void loadSpecifyVoteFromFile(String id) {
+        YamlConfiguration yamlVoteFile = VoteInFile.findSpecifyVoteFile(id);
+        if (yamlVoteFile != null) {
+            VoteTask newTask = new VoteTask(yamlVoteFile.getString("Name"), yamlVoteFile.getInt("TaskID"), yamlVoteFile.getString("Command"),
+                    yamlVoteFile.getString("releaseTime"), yamlVoteFile.getInt("effectTime"), yamlVoteFile.getBoolean("reuse"));
+            VOTE_TASKS.add(newTask);
+            if (verifyReleaseTime(newTask) != -1) {
+                Timer.checkTimeToRun(newTask);
+            }
+            if (newTask.isReuse()) {
+                Timer.isReuse(newTask);
+            }
+        }
+    }
+
     public static void reloadTaskAndConfig() {
         VOTE_TASKS.clear();
         loadVoteTaskFromFile(plugin);
@@ -164,13 +187,16 @@ public class Data {
         switch (type.toLowerCase()) {
             case Command.LIST_TYPE_GOING:
                 if (VOTE_TASKS.size() != 0) {
+                    boolean hasStartTask = false;
                     for (VoteTask voteTask : VOTE_TASKS) {
                         if (!voteTask.isStart() && voteTask.getThreadId() != 0) {
+                            hasStartTask = true;
                             commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName() + "  执行指令：" + voteTask.getCommand()
                                     + "  发布时间：" + voteTask.getReleaseTime() + "  投票时长：" + voteTask.getEffectTime() + "秒" + "  是否循环：" + voteTask.isReuse());
-                        } else {
-                            commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无未开始的投票");
                         }
+                    }
+                    if (!hasStartTask) {
+                        commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无未开始的投票");
                     }
                 } else {
                     commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无未开始的投票");
@@ -180,10 +206,8 @@ public class Data {
                 if (VOTE_TASKS.size() != 0) {
                     commandSender.sendMessage(DARK_GREEN + "==============SakuraVote==============");
                     for (VoteTask voteTask : VOTE_TASKS) {
-                        if (!voteTask.isStart() && voteTask.getThreadId() != 0) {
-                            commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName() + "  执行指令：" + voteTask.getCommand()
-                                    + "  发布时间：" + voteTask.getReleaseTime() + "  投票时长：" + voteTask.getEffectTime() + "秒" + "  是否循环：" + voteTask.isReuse());
-                        }
+                        commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName() + "  执行指令：" + voteTask.getCommand()
+                                + "  发布时间：" + voteTask.getReleaseTime() + "  投票时长：" + voteTask.getEffectTime() + "秒" + "  是否循环：" + voteTask.isReuse());
                     }
                     commandSender.sendMessage(DARK_GREEN + "======================================");
                 } else {
