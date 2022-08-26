@@ -5,5 +5,4 @@ author: MashiroT
 api-version: 1.13
 commands:
   vote:
-    description: "main"
     usage: /<command>

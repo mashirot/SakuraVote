@@ -129,23 +129,10 @@ public class Data {
             for (File voteFile : voteFiles) {
                 YamlConfiguration yamlVoteFile = YamlConfiguration.loadConfiguration(voteFile);
                 if (voteFile.getName().equals(yamlVoteFile.get("Name") + ".yml")) {
-                    if (VOTE_TASKS.size() != 0) {
-                        for (int i = 0; i < VOTE_TASKS.size(); i++) {
-                            boolean isLoad = VOTE_TASKS.get(i).getTaskId() == yamlVoteFile.getInt("TaskID");
-                            if (!isLoad) {
-                                VoteTask newTask = addVoteToListFromFile(yamlVoteFile);
-                                VOTE_TASKS.add(newTask);
-                                if (newTask.isReuse()) {
-                                    Timer.isReuse(newTask);
-                                }
-                            }
-                        }
-                    }else {
-                        VoteTask newTask = addVoteToListFromFile(yamlVoteFile);
-                        VOTE_TASKS.add(newTask);
-                        if (newTask.isReuse()) {
-                            Timer.isReuse(newTask);
-                        }
+                    VoteTask newTask = addVoteToListFromFile(yamlVoteFile);
+                    VOTE_TASKS.add(newTask);
+                    if (newTask.isReuse()) {
+                        Timer.isReuse(newTask);
                     }
                 }
             }
@@ -180,7 +167,6 @@ public class Data {
         VOTE_TASKS.clear();
         loadVoteTaskFromFile(plugin);
         plugin.reloadConfig();
-        plugin.getConfig();
     }
 
     public static boolean showList(String type, CommandSender commandSender) {

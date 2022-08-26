@@ -60,13 +60,13 @@ public class Command implements CommandExecutor {
                             && strings[TASK_RELEASE_TIME] != null && strings[TASK_EFFECT_TIME] != null && strings.length == TASK_CREATE_CORRECT_LENGTH) {
                         if (Data.addVote(strings[TASK_NAME], strings[TASK_ID], strings[TASK_COMMAND], strings[TASK_RELEASE_TIME], strings[TASK_EFFECT_TIME])) {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票创建成功，id：" + strings[TASK_ID]);
-                        }else {
+                        } else {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票创建失败，可能原因：[投票id]为数字，[投票id]重复");
                         }
                     } else {
                         commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                     }
-                }catch (Exception e) {
+                } catch (Exception e) {
                     PluginMessage.showCreateErrMessage(commandSender);
                 }
                 break;
@@ -77,13 +77,13 @@ public class Command implements CommandExecutor {
                     if (strings[TASK_DELETE_ID] != null && strings.length == TASK_DELETE_CORRECT_LENGTH) {
                         if (Data.delVote(strings[TASK_DELETE_ID])) {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票删除成功");
-                        }else {
+                        } else {
                             PluginMessage.showDelErrMessage(commandSender);
                         }
                     } else {
                         commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                     }
-                }catch (Exception e) {
+                } catch (Exception e) {
                     commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                 }
                 break;
@@ -94,16 +94,16 @@ public class Command implements CommandExecutor {
                         if (commandSender instanceof Player) {
                             if (Data.approveVote((Player) commandSender, strings[1])){
                                 commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票成功");
-                            }else {
+                            } else {
                                 commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票失败，id输入有误或投票未开始");
                             }
-                        }else {
+                        } else {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + "必须以玩家身份执行");
                         }
                     } else {
                         commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                     }
-                }catch (Exception e) {
+                } catch (Exception e) {
                     commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                 }
                 break;
@@ -114,16 +114,16 @@ public class Command implements CommandExecutor {
                         if (commandSender instanceof Player) {
                             if (Data.disApproveVote((Player) commandSender, strings[1])){
                                 commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票成功");
-                            }else {
+                            } else {
                                 commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票失败，id输入有误或投票未开始");
                             }
-                        }else {
+                        } else {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "必须以玩家身份执行");
                         }
                     } else {
                         commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                     }
-                }catch (Exception e) {
+                } catch (Exception e) {
                     commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                 }
                 break;
@@ -148,7 +148,7 @@ public class Command implements CommandExecutor {
                             strings[TASK_MODIFY_VALUE] != null && strings.length == TASK_MODIFY_CORRECT_LENGTH) {
                         if (Data.modifyVote(strings[TASK_MODIFY_ID], strings[TASK_MODIFY_TYPE], strings[TASK_MODIFY_VALUE])) {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "修改成功");
-                        }else {
+                        } else {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "修改失败，请重试");
                         }
                     } else {
@@ -164,7 +164,7 @@ public class Command implements CommandExecutor {
                     if (strings[TASK_CANCEL_ID] != null && strings.length == TASK_CANCEL_CORRECT_LENGTH) {
                         if (Timer.cancelTask(strings[TASK_CANCEL_ID])) {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "取消投票成功");
-                        }else {
+                        } else {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "取消失败，原因可能为：不存在该投票, 投票已被取消, 该投票已过期");
                         }
                     } else {

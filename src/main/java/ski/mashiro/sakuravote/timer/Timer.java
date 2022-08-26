@@ -39,10 +39,9 @@ public class Timer {
                             voteTask.changeVoteState();
                             Data.calcResult(voteTask);
                             Bukkit.getScheduler().cancelTask(voteTask.getTaskId());
-                            voteTask.setTaskId(0);
+                            voteTask.setThreadId(0);
                             if (voteTask.isReuse()) {
                                 isReuse(voteTask);
-                                loadSpecifyVoteFromFile(voteTask.getTaskId() + "");
                             }
                             cancel();
                         }
@@ -82,6 +81,9 @@ public class Timer {
                 newTime.set(Calendar.HOUR_OF_DAY, settingTime.get(Calendar.HOUR_OF_DAY));
                 newTime.set(Calendar.MINUTE, settingTime.get(Calendar.MINUTE));
                 newTime.set(Calendar.SECOND, settingTime.get(Calendar.SECOND));
+                if (newTime.getTime().getTime() < System.currentTimeMillis()) {
+                    newTime.set(Calendar.DATE, settingTime.get(Calendar.DATE) + 1);
+                }
                 voteTask.setReleaseTime(sdf.format(newTime.getTime()));
                 VoteInFile.modifyReuseTime(voteTask);
                 Data.VOTE_TASKS.remove(voteTask);
