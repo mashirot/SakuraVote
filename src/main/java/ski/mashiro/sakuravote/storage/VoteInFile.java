@@ -10,11 +10,11 @@ import java.io.File;
 public class VoteInFile {
     private VoteInFile() {}
 
-    private static final String NAME = "name";
-    private static final String COMMAND = "command";
-    private static final String RELEASE_TIME = "releasetime";
-    private static final String EFFECT_TIME = "effecttime";
-    private static final String REUSE = "reuse";
+    public static final String NAME = "name";
+    public static final String COMMAND = "command";
+    public static final String RELEASE_TIME = "releasetime";
+    public static final String EFFECT_TIME = "effecttime";
+    public static final String REUSE = "reuse";
 
     public static boolean createVoteFile(VoteTask voteTask) {
         File voteTaskFile = new File(Data.plugin.getDataFolder().getAbsolutePath() + "/VoteList/" + voteTask.getTaskName() + ".yml");
