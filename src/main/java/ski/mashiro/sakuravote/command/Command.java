@@ -44,6 +44,16 @@ public class Command implements CommandExecutor {
     private static final int RELOAD_CORRECT_LENGTH = 1;
     public static final String LIST_TYPE_GOING = "going";
     public static final String LIST_TYPE_ALL = "all";
+    public static final String PERMISSION_ADMIN_ALL = "vote.*";
+    public static final String PERMISSION_ADMIN_CREATE = "vote.admin.create";
+    public static final String PERMISSION_ADMIN_DELETE = "vote.admin.delete";
+    public static final String PERMISSION_ADMIN_SET = "vote.admin.set";
+    public static final String PERMISSION_ADMIN_CANCEL = "vote.admin.cancel";
+    public static final String PERMISSION_ADMIN_RELOAD = "vote.admin.reload";
+    public static final String PERMISSION_COMMON_LIST_ALL = "vote.list.all";
+    public static final String PERMISSION_COMMON_LIST_GOING = "vote.list.going";
+    public static final String PERMISSION_COMMON_APPROVE = "vote.approve";
+    public static final String PERMISSION_COMMON_DISAPPROVE = "vote.disapprove";
 
     @Override
     public boolean onCommand(CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
@@ -53,38 +63,47 @@ public class Command implements CommandExecutor {
             return true;
         }
         String cmd = strings[0];
-        switch (cmd.toLowerCase()){
+        switch (cmd.toLowerCase()) {
             case CREATE:
-                try {
-                    if (strings[TASK_NAME] != null && strings[TASK_ID]!= null && strings[TASK_COMMAND] != null
-                            && strings[TASK_RELEASE_TIME] != null && strings[TASK_EFFECT_TIME] != null && strings.length == TASK_CREATE_CORRECT_LENGTH) {
-                        if (Data.addVote(strings[TASK_NAME], strings[TASK_ID], strings[TASK_COMMAND], strings[TASK_RELEASE_TIME], strings[TASK_EFFECT_TIME])) {
-                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票创建成功，id：" + strings[TASK_ID]);
+                if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_ADMIN_CREATE)) {
+                    try {
+                        if (strings[TASK_NAME] != null && strings[TASK_ID]!= null && strings[TASK_COMMAND] != null
+                                && strings[TASK_RELEASE_TIME] != null && strings[TASK_EFFECT_TIME] != null && strings.length == TASK_CREATE_CORRECT_LENGTH) {
+                            if (Data.addVote(strings[TASK_NAME], strings[TASK_ID], strings[TASK_COMMAND], strings[TASK_RELEASE_TIME], strings[TASK_EFFECT_TIME])) {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票创建成功，id：" + strings[TASK_ID]);
+                            } else {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票创建失败，可能原因：[投票id]为数字，[投票id]重复，[投票名]重复，时间格式错误");
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "请输入/vote 查看使用说明");
+                            }
                         } else {
-                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票创建失败，可能原因：[投票id]为数字，[投票id]重复");
+                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                         }
-                    } else {
-                        commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
+                    } catch (Exception e) {
+                        PluginMessage.showCreateErrMessage(commandSender);
                     }
-                } catch (Exception e) {
-                    PluginMessage.showCreateErrMessage(commandSender);
+                } else {
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
                 }
                 break;
 
             case DEL:
             case DELETE:
-                try {
-                    if (strings[TASK_DELETE_ID] != null && strings.length == TASK_DELETE_CORRECT_LENGTH) {
-                        if (Data.delVote(strings[TASK_DELETE_ID])) {
-                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票删除成功");
+                if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_ADMIN_DELETE)) {
+                    try {
+                        if (strings[TASK_DELETE_ID] != null && strings.length == TASK_DELETE_CORRECT_LENGTH) {
+                            if (Data.delVote(strings[TASK_DELETE_ID])) {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票删除成功");
+                            } else {
+                                PluginMessage.showDelErrMessage(commandSender);
+                            }
                         } else {
-                            PluginMessage.showDelErrMessage(commandSender);
+                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                         }
-                    } else {
+                    } catch (Exception e) {
                         commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                     }
-                } catch (Exception e) {
-                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
+                } else {
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
                 }
                 break;
 
@@ -92,10 +111,14 @@ public class Command implements CommandExecutor {
                 try {
                     if (strings[1] != null && strings.length == TASK_APPROVE_CORRECT_LENGTH) {
                         if (commandSender instanceof Player) {
-                            if (Data.approveVote((Player) commandSender, strings[1])){
-                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票成功");
+                            if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_COMMON_APPROVE)) {
+                                if (Data.approveVote((Player) commandSender, strings[1])){
+                                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票成功");
+                                } else {
+                                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票失败，id输入有误或投票未开始");
+                                }
                             } else {
-                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票失败，id输入有误或投票未开始");
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
                             }
                         } else {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + "必须以玩家身份执行");
@@ -112,10 +135,14 @@ public class Command implements CommandExecutor {
                 try {
                     if (strings[1] != null && strings.length == TASK_DISAPPROVE_CORRECT_LENGTH) {
                         if (commandSender instanceof Player) {
-                            if (Data.disApproveVote((Player) commandSender, strings[1])){
-                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票成功");
+                            if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_COMMON_DISAPPROVE)) {
+                                if (Data.disApproveVote((Player) commandSender, strings[1])){
+                                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票成功");
+                                } else {
+                                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票失败，id输入有误或投票未开始");
+                                }
                             } else {
-                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票失败，id输入有误或投票未开始");
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
                             }
                         } else {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "必须以玩家身份执行");
@@ -143,44 +170,56 @@ public class Command implements CommandExecutor {
                 break;
 
             case SET:
-                try {
-                    if (strings[TASK_MODIFY_ID] != null && strings[TASK_MODIFY_TYPE] != null &&
-                            strings[TASK_MODIFY_VALUE] != null && strings.length == TASK_MODIFY_CORRECT_LENGTH) {
-                        if (Data.modifyVote(strings[TASK_MODIFY_ID], strings[TASK_MODIFY_TYPE], strings[TASK_MODIFY_VALUE])) {
-                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "修改成功");
+                if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_ADMIN_SET)) {
+                    try {
+                        if (strings[TASK_MODIFY_ID] != null && strings[TASK_MODIFY_TYPE] != null &&
+                                strings[TASK_MODIFY_VALUE] != null && strings.length == TASK_MODIFY_CORRECT_LENGTH) {
+                            if (Data.modifyVote(strings[TASK_MODIFY_ID], strings[TASK_MODIFY_TYPE], strings[TASK_MODIFY_VALUE])) {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "修改成功");
+                            } else {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "修改失败，请重试");
+                            }
                         } else {
-                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "修改失败，请重试");
+                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                         }
-                    } else {
+                    } catch (Exception e) {
                         commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                     }
-                } catch (Exception e) {
-                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
+                } else {
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
                 }
                 break;
 
             case CANCEL:
-                try {
-                    if (strings[TASK_CANCEL_ID] != null && strings.length == TASK_CANCEL_CORRECT_LENGTH) {
-                        if (Timer.cancelTask(strings[TASK_CANCEL_ID])) {
-                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "取消投票成功");
+                if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_ADMIN_CANCEL)) {
+                    try {
+                        if (strings[TASK_CANCEL_ID] != null && strings.length == TASK_CANCEL_CORRECT_LENGTH) {
+                            if (Timer.cancelTask(strings[TASK_CANCEL_ID])) {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "取消投票成功");
+                            } else {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "取消失败，原因可能为：不存在该投票, 投票已被取消, 该投票已过期");
+                            }
                         } else {
-                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "取消失败，原因可能为：不存在该投票, 投票已被取消, 该投票已过期");
+                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                         }
-                    } else {
+                    } catch (Exception e) {
                         commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                     }
-                } catch (Exception e) {
-                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
+                } else {
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
                 }
                 break;
 
             case RELOAD:
-                if (strings.length == RELOAD_CORRECT_LENGTH) {
-                    Data.reloadTaskAndConfig();
-                    commandSender.sendMessage(GREEN + "[SakuraVote] " + AQUA + "重载成功");
+                if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_ADMIN_RELOAD)) {
+                    if (strings.length == RELOAD_CORRECT_LENGTH) {
+                        Data.reloadTaskAndConfig();
+                        commandSender.sendMessage(GREEN + "[SakuraVote] " + AQUA + "重载成功");
+                    } else {
+                        commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
+                    }
                 } else {
-                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
                 }
                 break;
 

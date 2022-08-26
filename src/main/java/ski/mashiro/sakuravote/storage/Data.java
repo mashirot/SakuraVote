@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.bukkit.ChatColor.*;
+import static ski.mashiro.sakuravote.command.Command.*;
 
 /**
  * @author MashiroT
@@ -172,32 +173,40 @@ public class Data {
     public static boolean showList(String type, CommandSender commandSender) {
         switch (type.toLowerCase()) {
             case Command.LIST_TYPE_GOING:
-                if (VOTE_TASKS.size() != 0) {
-                    boolean hasStartTask = false;
-                    for (VoteTask voteTask : VOTE_TASKS) {
-                        if (!voteTask.isStart() && voteTask.getThreadId() != 0) {
-                            hasStartTask = true;
-                            commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName() + "  执行指令：" + voteTask.getCommand()
-                                    + "  发布时间：" + voteTask.getReleaseTime() + "  投票时长：" + voteTask.getEffectTime() + "秒" + "  是否循环：" + voteTask.isReuse());
+                if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_COMMON_LIST_GOING)) {
+                    if (VOTE_TASKS.size() != 0) {
+                        boolean hasStartTask = false;
+                        for (VoteTask voteTask : VOTE_TASKS) {
+                            if (!voteTask.isStart() && voteTask.getThreadId() != 0) {
+                                hasStartTask = true;
+                                commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName() + "  执行指令：" + voteTask.getCommand()
+                                        + "  发布时间：" + voteTask.getReleaseTime() + "  投票时长：" + voteTask.getEffectTime() + "秒" + "  是否循环：" + voteTask.isReuse());
+                            }
                         }
-                    }
-                    if (!hasStartTask) {
+                        if (!hasStartTask) {
+                            commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无未开始的投票");
+                        }
+                    } else {
                         commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无未开始的投票");
                     }
                 } else {
-                    commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无未开始的投票");
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
                 }
                 return true;
             case Command.LIST_TYPE_ALL:
-                if (VOTE_TASKS.size() != 0) {
-                    commandSender.sendMessage(DARK_GREEN + "==============SakuraVote==============");
-                    for (VoteTask voteTask : VOTE_TASKS) {
-                        commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName() + "  执行指令：" + voteTask.getCommand()
-                                + "  发布时间：" + voteTask.getReleaseTime() + "  投票时长：" + voteTask.getEffectTime() + "秒" + "  是否循环：" + voteTask.isReuse());
+                if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_COMMON_LIST_ALL)) {
+                    if (VOTE_TASKS.size() != 0) {
+                        commandSender.sendMessage(DARK_GREEN + "==============SakuraVote==============");
+                        for (VoteTask voteTask : VOTE_TASKS) {
+                            commandSender.sendMessage("投票id：" + voteTask.getTaskId() + "  投票名：" + voteTask.getTaskName() + "  执行指令：" + voteTask.getCommand()
+                                    + "  发布时间：" + voteTask.getReleaseTime() + "  投票时长：" + voteTask.getEffectTime() + "秒" + "  是否循环：" + voteTask.isReuse());
+                        }
+                        commandSender.sendMessage(DARK_GREEN + "======================================");
+                    } else {
+                        commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无投票");
                     }
-                    commandSender.sendMessage(DARK_GREEN + "======================================");
                 } else {
-                    commandSender.sendMessage(GREEN + "[SakuraVote] " + GRAY + "暂无投票");
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
                 }
                 return true;
             default:
