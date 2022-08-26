@@ -2,17 +2,23 @@ package ski.mashiro.sakuravote.command;
 
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ski.mashiro.sakuravote.message.PluginMessage;
 import ski.mashiro.sakuravote.storage.Data;
+import ski.mashiro.sakuravote.storage.VoteInFile;
 import ski.mashiro.sakuravote.timer.Timer;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.bukkit.ChatColor.*;
 
 /**
  * @author MashiroT
  */
-public class Command implements CommandExecutor {
+public class Command implements CommandExecutor, TabCompleter {
 
     private static final String CREATE = "create";
     private static final String DEL = "del";
@@ -228,5 +234,30 @@ public class Command implements CommandExecutor {
                 break;
         }
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
+
+        if (strings.length == 0) {
+            return null;
+        }
+
+        if (strings.length == 1) {
+            String[] mainCommand = {CREATE, DELETE, SET, LIST, APPROVE, DISAPPROVE, CANCEL};
+            return Arrays.stream(mainCommand).filter(str -> str.startsWith(strings[0])).collect(Collectors.toList());
+        }
+
+        if (strings[0].equalsIgnoreCase(LIST) && strings.length == LIST_TYPE + 1) {
+            String[] listType = {LIST_TYPE_ALL, LIST_TYPE_GOING};
+            return Arrays.stream(listType).filter(str -> str.startsWith(strings[1])).collect(Collectors.toList());
+        }
+
+        if (strings[0].equalsIgnoreCase(SET) && strings.length == TASK_MODIFY_TYPE + 1) {
+            String[] setType = {VoteInFile.NAME, VoteInFile.COMMAND, VoteInFile.RELEASE_TIME, VoteInFile.EFFECT_TIME, VoteInFile.REUSE};
+            return Arrays.stream(setType).filter(str -> str.startsWith(strings[2])).collect(Collectors.toList());
+        }
+
+        return null;
     }
 }

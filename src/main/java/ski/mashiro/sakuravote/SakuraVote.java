@@ -22,6 +22,7 @@ public class SakuraVote extends JavaPlugin {
     @Override
     public void onEnable() {
         Bukkit.getPluginCommand("vote").setExecutor(new Command());
+        Bukkit.getPluginCommand("vote").setTabCompleter(new Command());
         Data.plugin = this;
         this.saveDefaultConfig();
         CreateEg.isFolderExist(this);
