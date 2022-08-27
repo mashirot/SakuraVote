@@ -227,7 +227,7 @@ public class Data {
                     @Override
                     public void run() {
                         int time = 5;
-                        while (time >= 0) {
+                        while (time > 0) {
                             Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + GRAY + time--);
                             try {
                                 Thread.sleep(1000);
