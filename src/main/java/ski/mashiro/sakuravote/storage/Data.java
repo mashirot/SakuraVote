@@ -257,8 +257,8 @@ public class Data {
         for (int i = 0; i < disApprovePlayers.size(); i++) {
             disPlayer.append(disApprovePlayers.get(i).getName()).append(disApprovePlayers.size() - 1 == i ? "" : "，");
         }
-        Bukkit.broadcastMessage("[SakuraVote]赞成玩家：" + yesPlayer);
-        Bukkit.broadcastMessage("[SakuraVote]反对玩家：" + disPlayer);
+        Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + GREEN + "赞成玩家：" + yesPlayer);
+        Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + GREEN + "反对玩家：" + disPlayer);
     }
 
     public static long transformTime(String stringDate) {
