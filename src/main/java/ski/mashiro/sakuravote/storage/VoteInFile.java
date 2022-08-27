@@ -79,7 +79,7 @@ public class VoteInFile {
                                     yamlVoteFile.save(voteFile);
                                     return true;
                                 case COMMAND:
-                                    yamlVoteFile.set("Command", newValue);
+                                    yamlVoteFile.set("Command", Data.replaceCommand(newValue));
                                     yamlVoteFile.save(voteFile);
                                     return true;
                                 case RELEASE_TIME:
