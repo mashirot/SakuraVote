@@ -221,14 +221,14 @@ public class Data {
     public static void calcResult(VoteTask voteTask) {
         switch (Arithmetic.result(voteTask.votes)) {
             case 1:
-                Bukkit.broadcastMessage("[SakuraVote]投票通过");
-                Bukkit.broadcastMessage("[SakuraVote]将在5秒后执行任务：" + voteTask.getTaskName());
+                Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + AQUA + "投票通过");
+                Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + BLUE + "将在5秒后执行任务：" + voteTask.getTaskName());
                 new BukkitRunnable() {
                     @Override
                     public void run() {
                         int time = 5;
                         while (time >= 0) {
-                            Bukkit.broadcastMessage(time-- + "");
+                            Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + GRAY + time--);
                             try {
                                 Thread.sleep(1000);
                             } catch (Exception ignore) {}
@@ -239,11 +239,11 @@ public class Data {
                 }.runTaskAsynchronously(plugin);
                 break;
             case 0:
-                Bukkit.broadcastMessage("[SakuraVote]投票不通过");
+                Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + AQUA + "投票不通过");
                 break;
             case -1:
             default:
-                Bukkit.broadcastMessage("[SakuraVote]投票人数小于在线人数的一半，本次结果无效");
+                Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + AQUA + "投票人数小于在线人数的一半，本次结果无效");
                 break;
         }
     }

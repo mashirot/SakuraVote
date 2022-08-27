@@ -33,7 +33,7 @@ public class Arithmetic {
                     approvePlayers.add(singlePlayerChoice.getValue());
                 }
             }
-            if (disApprove < (votePlayerCounts / HALF)) {
+            if (disApprove > (votePlayerCounts / HALF)) {
                 Data.showResult(approvePlayers, disApprovePlayers);
                 return 0;
             }

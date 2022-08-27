@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import static org.bukkit.ChatColor.*;
 import static ski.mashiro.sakuravote.storage.Data.*;
 
 /**
@@ -26,16 +27,16 @@ public class Timer {
             BukkitTask delay = new BukkitRunnable() {
                 @Override
                 public void run() {
-                    Bukkit.broadcastMessage("[SakuraVote] 即将开始投票");
-                    Bukkit.broadcastMessage("[SakuraVote] 投票名：" + voteTask.getTaskName());
-                    Bukkit.broadcastMessage("[SakuraVote] 投票ID：" + voteTask.getTaskId());
-                    Bukkit.broadcastMessage("[SakuraVote] 投票时间：" + voteTask.getEffectTime() + "秒");
-                    Bukkit.broadcastMessage("[SakuraVote] 输入/vote [approve/disapprove] " + voteTask.getTaskId() + " 进行支持或反对");
+                    Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW + "即将开始投票");
+                    Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "投票名：" + voteTask.getTaskName());
+                    Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "投票ID：" + voteTask.getTaskId());
+                    Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "投票时间：" + voteTask.getEffectTime() + "秒");
+                    Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "输入/vote [approve/disapprove] " + voteTask.getTaskId() + " 进行支持或反对");
                     voteTask.changeVoteState();
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            Bukkit.broadcastMessage("[SakuraVote] 投票结束");
+                            Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW + "投票结束");
                             voteTask.changeVoteState();
                             Data.calcResult(voteTask);
                             Bukkit.getScheduler().cancelTask(voteTask.getTaskId());
