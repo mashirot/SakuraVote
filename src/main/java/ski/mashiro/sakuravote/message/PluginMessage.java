@@ -26,6 +26,7 @@ public class PluginMessage {
         commandSender.sendMessage(GRAY + "类型：有效时间[effecttime], 循环[reuse](内容填写true/false)");
         commandSender.sendMessage(GREEN + "7. /vote cancel [投票id]");
         commandSender.sendMessage(GRAY + "说明：只能取消未过期的投票(不删除)，删除投票请使用[2.]");
+        commandSender.sendMessage(GREEN + "8. /vote reload");
         commandSender.sendMessage(DARK_GREEN + "======================================");
     }
 
