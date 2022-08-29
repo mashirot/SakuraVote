@@ -1,6 +1,8 @@
 package ski.mashiro.sakuravote.message;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import ski.mashiro.sakuravote.votetype.ConditionVote;
 
 import static org.bukkit.ChatColor.*;
 
@@ -25,17 +27,22 @@ public class PluginMessage {
         commandSender.sendMessage(GRAY + "类型：投票名[name], 执行指令[command], 发布时间[releasetime]");
         commandSender.sendMessage(GRAY + "类型：有效时间[effecttime], 循环[reuse](内容填写true/false)");
         commandSender.sendMessage(GREEN + "7. /vote cancel [投票id]");
+        commandSender.sendMessage(GREEN + "8. /vote condcreate [投票名] [投票id] [通过后执行的指令] [需要玩家数量] [有效时间]");
+        commandSender.sendMessage(GREEN + "9. /vote condset [投票id] [类型] [内容]");
+        commandSender.sendMessage(GRAY + "类型：投票名[name], 执行指令[command], 需要玩家数量[playernumber]");
+        commandSender.sendMessage(GRAY + "类型：有效时间[effecttime], 重启后自动启用[autostart](内容填写true/false)");
         commandSender.sendMessage(GRAY + "说明：只能取消未过期的投票(不删除)，删除投票请使用[2.]");
-        commandSender.sendMessage(GREEN + "8. /vote reload");
+        commandSender.sendMessage(GREEN + "10. /vote reload");
         commandSender.sendMessage(DARK_GREEN + "======================================");
     }
 
-    public static void showCreateErrMessage(CommandSender commandSender) {
-        commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票创建失败，输入格式有误");
-    }
-
-    public static void showDelErrMessage(CommandSender commandSender) {
-        commandSender.sendMessage(GREEN + "[SakuraVote] " + "删除失败，id输入有误或任务不存在");
+    public static void startVoteMessage(Object o) {
+        ConditionVote voteTask = (ConditionVote) o;
+        Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW + "即将开始投票");
+        Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "投票名：" + voteTask.getTaskName());
+        Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "投票ID：" + voteTask.getTaskId());
+        Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "投票时间：" + voteTask.getEffectTime() + "秒");
+        Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "输入/vote [approve/disapprove] " + voteTask.getTaskId() + " 进行支持或反对");
     }
 
 }

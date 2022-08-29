@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import ski.mashiro.sakuravote.bstats.Metrics;
 import ski.mashiro.sakuravote.command.Command;
+import ski.mashiro.sakuravote.listener.Listener;
 import ski.mashiro.sakuravote.storage.CreateEg;
 import ski.mashiro.sakuravote.storage.Data;
 import ski.mashiro.sakuravote.update.Checker;
@@ -23,6 +24,7 @@ public class SakuraVote extends JavaPlugin {
     public void onEnable() {
         Bukkit.getPluginCommand("vote").setExecutor(new Command());
         Bukkit.getPluginCommand("vote").setTabCompleter(new Command());
+        Bukkit.getPluginManager().registerEvents(new Listener(), this);
         Data.plugin = this;
         this.saveDefaultConfig();
         CreateEg.isFolderExist(this);

@@ -1,4 +1,4 @@
-package ski.mashiro.sakuravote.storage;
+package ski.mashiro.sakuravote.votetype;
 
 import org.bukkit.entity.Player;
 
@@ -22,6 +22,13 @@ public class VoteTask {
     public final HashMap<Integer, Player> votes = new HashMap<>();
 
     public VoteTask() {}
+
+    public VoteTask(String taskName, int taskId, String command, int effectTime) {
+        this.taskName = taskName;
+        this.taskId = taskId;
+        this.command = command;
+        this.effectTime = effectTime;
+    }
 
     public VoteTask(String taskName, int taskId, String command, String releaseTime, int effectTime, boolean isReuse) {
         this.taskName = taskName;
@@ -75,6 +82,7 @@ public class VoteTask {
     public void setCommand(String command) {
         this.command = command;
     }
+
     public String getTaskName() {
         return taskName;
     }

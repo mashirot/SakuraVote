@@ -21,12 +21,14 @@ import static org.bukkit.ChatColor.*;
 public class Command implements CommandExecutor, TabCompleter {
 
     private static final String CREATE = "create";
+    private static final String CONDITIONAL_VOTE_CREATE = "condcreate";
     private static final String DEL = "del";
     private static final String DELETE = "delete";
     private static final String APPROVE = "approve";
     private static final String DISAPPROVE = "disapprove";
     private static final String LIST = "list";
     private static final String SET = "set";
+    private static final String CONDITIONAL_VOTE_SET = "condset";
     private static final String CANCEL = "cancel";
     private static final String RELOAD = "reload";
     private static final int TASK_NAME = 1;
@@ -35,6 +37,8 @@ public class Command implements CommandExecutor, TabCompleter {
     private static final int TASK_RELEASE_TIME = 4;
     private static final int TASK_EFFECT_TIME = 5;
     private static final int TASK_CREATE_CORRECT_LENGTH = 6;
+    private static final int CONDITIONAL_VOTE_PLAYER_NUM = 4;
+    private static final int CONDITIONAL_VOTE_CORRECT_LENGTH = 6;
     private static final int TASK_DELETE_ID = 1;
     private static final int TASK_DELETE_CORRECT_LENGTH = 2;
     private static final int TASK_APPROVE_CORRECT_LENGTH = 2;
@@ -85,7 +89,29 @@ public class Command implements CommandExecutor, TabCompleter {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                         }
                     } catch (Exception e) {
-                        PluginMessage.showCreateErrMessage(commandSender);
+                        commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
+                    }
+                } else {
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
+                }
+                break;
+
+            case CONDITIONAL_VOTE_CREATE:
+                if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_ADMIN_CREATE)) {
+                    try {
+                        if (strings[TASK_NAME] != null && strings[TASK_ID]!= null && strings[TASK_COMMAND] != null
+                                && strings[CONDITIONAL_VOTE_PLAYER_NUM] != null && strings[TASK_EFFECT_TIME] != null && strings.length == CONDITIONAL_VOTE_CORRECT_LENGTH) {
+                            if (Data.addConditionalVote(strings[TASK_NAME], strings[TASK_ID], strings[TASK_COMMAND], strings[CONDITIONAL_VOTE_PLAYER_NUM], strings[TASK_EFFECT_TIME])) {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票创建成功，id：" + strings[TASK_ID]);
+                            } else {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票创建失败，可能原因：[投票id]为数字，[投票id]重复，[投票名]重复");
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "请输入/vote 查看使用说明");
+                            }
+                        } else {
+                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
+                        }
+                    } catch (Exception e) {
+                        commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
                     }
                 } else {
                     commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
@@ -100,7 +126,7 @@ public class Command implements CommandExecutor, TabCompleter {
                             if (Data.delVote(strings[TASK_DELETE_ID])) {
                                 commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "投票删除成功");
                             } else {
-                                PluginMessage.showDelErrMessage(commandSender);
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + "删除失败，id输入有误或任务不存在");
                             }
                         } else {
                             commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
@@ -195,6 +221,26 @@ public class Command implements CommandExecutor, TabCompleter {
                     commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
                 }
                 break;
+            case CONDITIONAL_VOTE_SET:
+                if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_ADMIN_SET)) {
+                    try {
+                        if (strings[TASK_MODIFY_ID] != null && strings[TASK_MODIFY_TYPE] != null &&
+                                strings[TASK_MODIFY_VALUE] != null && strings.length == TASK_MODIFY_CORRECT_LENGTH) {
+                            if (Data.modifyConditionalVote(strings[TASK_MODIFY_ID], strings[TASK_MODIFY_TYPE], strings[TASK_MODIFY_VALUE])) {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "修改成功");
+                            } else {
+                                commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "修改失败，请重试");
+                            }
+                        } else {
+                            commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
+                        }
+                    } catch (Exception e) {
+                        commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "输入有误，请输入/vote 查看使用说明");
+                    }
+                } else {
+                    commandSender.sendMessage(GREEN + "[SakuraVote] " + DARK_AQUA + "权限不足");
+                }
+                break;
 
             case CANCEL:
                 if (commandSender.hasPermission(PERMISSION_ADMIN_ALL) || commandSender.hasPermission(PERMISSION_ADMIN_CANCEL)) {
@@ -244,7 +290,7 @@ public class Command implements CommandExecutor, TabCompleter {
         }
 
         if (strings.length == 1) {
-            String[] mainCommand = {CREATE, DELETE, SET, LIST, APPROVE, DISAPPROVE, CANCEL};
+            String[] mainCommand = {CREATE, DELETE, SET, LIST, APPROVE, DISAPPROVE, CANCEL, CONDITIONAL_VOTE_CREATE, CONDITIONAL_VOTE_SET};
             return Arrays.stream(mainCommand).filter(str -> str.startsWith(strings[0])).collect(Collectors.toList());
         }
 
@@ -255,6 +301,11 @@ public class Command implements CommandExecutor, TabCompleter {
 
         if (strings[0].equalsIgnoreCase(SET) && strings.length == TASK_MODIFY_TYPE + 1) {
             String[] setType = {VoteInFile.NAME, VoteInFile.COMMAND, VoteInFile.RELEASE_TIME, VoteInFile.EFFECT_TIME, VoteInFile.REUSE};
+            return Arrays.stream(setType).filter(str -> str.startsWith(strings[2])).collect(Collectors.toList());
+        }
+
+        if (strings[0].equalsIgnoreCase(CONDITIONAL_VOTE_SET) && strings.length == TASK_MODIFY_TYPE + 1) {
+            String[] setType = {VoteInFile.NAME, VoteInFile.COMMAND, VoteInFile.PLAYER_NUM, VoteInFile.EFFECT_TIME, VoteInFile.AUTOSTART};
             return Arrays.stream(setType).filter(str -> str.startsWith(strings[2])).collect(Collectors.toList());
         }
 

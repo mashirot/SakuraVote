@@ -3,9 +3,11 @@ package ski.mashiro.sakuravote.timer;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import ski.mashiro.sakuravote.message.PluginMessage;
 import ski.mashiro.sakuravote.storage.Data;
 import ski.mashiro.sakuravote.storage.VoteInFile;
-import ski.mashiro.sakuravote.storage.VoteTask;
+import ski.mashiro.sakuravote.votetype.ConditionVote;
+import ski.mashiro.sakuravote.votetype.VoteTask;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -27,11 +29,7 @@ public class Timer {
             BukkitTask delay = new BukkitRunnable() {
                 @Override
                 public void run() {
-                    Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW + "即将开始投票");
-                    Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "投票名：" + voteTask.getTaskName());
-                    Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "投票ID：" + voteTask.getTaskId());
-                    Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "投票时间：" + voteTask.getEffectTime() + "秒");
-                    Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW  + "输入/vote [approve/disapprove] " + voteTask.getTaskId() + " 进行支持或反对");
+                    PluginMessage.startVoteMessage(voteTask);
                     voteTask.changeVoteState();
                     new BukkitRunnable() {
                         @Override
@@ -53,10 +51,41 @@ public class Timer {
         }
     }
 
+    public static void startCondVote(ConditionVote conditionVote) {
+        BukkitTask delay = new BukkitRunnable() {
+            @Override
+            public void run() {
+                PluginMessage.startVoteMessage(conditionVote);
+                conditionVote.changeVoteState();
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        Bukkit.broadcastMessage(GREEN + "[SakuraVote] " + YELLOW + "投票结束");
+                        conditionVote.changeVoteState();
+                        calcResult(conditionVote);
+                        Bukkit.getScheduler().cancelTask(conditionVote.getTaskId());
+                        conditionVote.setThreadId(0);
+                        cancel();
+                    }
+                }.runTaskLaterAsynchronously(plugin, conditionVote.getEffectTime() * 20L);
+            }
+        }.runTaskAsynchronously(Data.plugin);
+        conditionVote.setThreadId(delay.getTaskId());
+    }
+
     public static boolean cancelTask(String cancelId) {
         if (isInteger(cancelId)) {
             int id = Integer.parseInt(cancelId);
             for (VoteTask voteTask : Data.VOTE_TASKS) {
+                if (voteTask.getTaskId() == id) {
+                    if (voteTask.getThreadId() != 0) {
+                        Bukkit.getScheduler().cancelTask(voteTask.getThreadId());
+                        voteTask.setThreadId(0);
+                        return true;
+                    }
+                }
+            }
+            for (ConditionVote voteTask : CONDITIONAL_VOTE_TASKS) {
                 if (voteTask.getTaskId() == id) {
                     if (voteTask.getThreadId() != 0) {
                         Bukkit.getScheduler().cancelTask(voteTask.getThreadId());
@@ -86,7 +115,7 @@ public class Timer {
                     newTime.set(Calendar.DATE, settingTime.get(Calendar.DATE) + 1);
                 }
                 voteTask.setReleaseTime(sdf.format(newTime.getTime()));
-                VoteInFile.modifyReuseTime(voteTask);
+                VoteInFile.modifyReleaseTime(voteTask);
                 Data.VOTE_TASKS.remove(voteTask);
                 VOTE_TASKS.add(voteTask);
                 checkTimeToRun(voteTask);
@@ -95,4 +124,14 @@ public class Timer {
             e.printStackTrace();
         }
     }
+
+    public static void checkPlayerNum() {
+        for (int i = 0; i < RUNNING_CONDITIONAL_VOTE_TASKS.size(); i++) {
+            if (ONLINE_PLAYER_NUM.size() >= RUNNING_CONDITIONAL_VOTE_TASKS.get(i).getStartPlayerNumber()) {
+                startCondVote(RUNNING_CONDITIONAL_VOTE_TASKS.get(i));
+                RUNNING_CONDITIONAL_VOTE_TASKS.remove(RUNNING_CONDITIONAL_VOTE_TASKS.get(i));
+            }
+        }
+    }
+
 }
