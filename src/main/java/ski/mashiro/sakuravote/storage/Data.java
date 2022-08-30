@@ -13,9 +13,7 @@ import ski.mashiro.sakuravote.votetype.VoteTask;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.bukkit.ChatColor.*;
 import static ski.mashiro.sakuravote.command.Command.*;
@@ -265,7 +263,11 @@ public class Data {
 
     public static void reloadTaskAndConfig() {
         VOTE_TASKS.clear();
+        CONDITIONAL_VOTE_TASKS.clear();
+        RUNNING_CONDITIONAL_VOTE_TASKS.clear();
+        ONLINE_PLAYER_NUM.clear();
         loadVoteTaskFromFile(plugin);
+        ONLINE_PLAYER_NUM.addAll(plugin.getServer().getOnlinePlayers());
         plugin.reloadConfig();
     }
 
