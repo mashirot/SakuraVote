@@ -27,11 +27,11 @@ public class PluginMessage {
         commandSender.sendMessage(GRAY + "类型：投票名[name], 执行指令[command], 发布时间[releasetime]");
         commandSender.sendMessage(GRAY + "类型：有效时间[effecttime], 循环[reuse](内容填写true/false)");
         commandSender.sendMessage(GREEN + "7. /vote cancel [投票id]");
+        commandSender.sendMessage(GRAY + "说明：只能取消未过期的投票(不删除)，删除投票请使用[2.]");
         commandSender.sendMessage(GREEN + "8. /vote condcreate [投票名] [投票id] [通过后执行的指令] [需要玩家数量] [有效时间]");
         commandSender.sendMessage(GREEN + "9. /vote condset [投票id] [类型] [内容]");
         commandSender.sendMessage(GRAY + "类型：投票名[name], 执行指令[command], 需要玩家数量[playernumber]");
         commandSender.sendMessage(GRAY + "类型：有效时间[effecttime], 重启后自动启用[autostart](内容填写true/false)");
-        commandSender.sendMessage(GRAY + "说明：只能取消未过期的投票(不删除)，删除投票请使用[2.]");
         commandSender.sendMessage(GREEN + "10. /vote reload");
         commandSender.sendMessage(DARK_GREEN + "======================================");
     }
